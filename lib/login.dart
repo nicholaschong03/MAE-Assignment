@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,6 +15,16 @@ class LoginPage extends StatelessWidget {
         title: const Text('Jom Eat'),
       ),
       body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.orange,
+              Colors.white54,
+            ],
+          ),
+        ),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -17,8 +32,8 @@ class LoginPage extends StatelessWidget {
             // Logo
             Image.asset(
               'assets/images/logo.png',
-              width: 100,
-              height: 100,
+              width: 150,
+              height: 150,
             ),
             const SizedBox(height: 16.0),
             // Username TextField
@@ -36,20 +51,36 @@ class LoginPage extends StatelessWidget {
               obscureText: true,
             ),
             const SizedBox(height: 16.0),
-            // Forget Password
-            TextButton(
-              onPressed: () {
-                // TODO: Implement forget password functionality
-              },
-              child: Text('Forget Password'),
+            // Row containing Forget Password and Login buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Forget Password
+                TextButton(
+                  onPressed: () {
+                    // TODO: Implement forget password functionality
+                  },
+                  child: const Text('Forget Password'),
+                ),
+                // Login Button
+                ElevatedButton(
+                  onPressed: () {
+                    // TODO: Implement login functionality
+                  },
+                  child: const Text('Login'),
+                ),
+              ],
             ),
-            const SizedBox(height: 16.0),
-            // Sign Up
-            TextButton(
-              onPressed: () {
-                // TODO: Implement sign up functionality
-              },
-              child: const Text('Sign Up'),
+            // Row containing Sign Up button aligned to the left
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    // TODO: Implement sign up functionality
+                  },
+                  child: const Text('First time here? Sign up now'),
+                ),
+              ],
             ),
           ],
         ),
