@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
+import 'package:jom_eat_project/Loginpage/signup.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key});
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -11,35 +12,33 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Jom Eat'),
-      ),
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.orange,
-              Colors.white54,
-            ],
-          ),
+          color: Color.fromARGB(255, 255, 234, 207),
         ),
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(30.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Logo
             Image.asset(
               'assets/images/logo.png',
-              width: 150,
-              height: 150,
+              width: 200,
+              height: 200,
             ),
             const SizedBox(height: 16.0),
             // Username TextField
             const TextField(
               decoration: InputDecoration(
                 labelText: 'Username',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                ),
+                labelStyle: TextStyle(
+                  color: Colors.orange,
+                ),
+                fillColor: Color.fromARGB(255, 255, 255, 255),
+                filled: true,
               ),
             ),
             const SizedBox(height: 16.0),
@@ -47,6 +46,14 @@ class _LoginPageState extends State<LoginPage> {
             const TextField(
               decoration: InputDecoration(
                 labelText: 'Password',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                ),
+                labelStyle: TextStyle(
+                  color: Colors.orange,
+                ),
+                fillColor: Color.fromARGB(255, 255, 255, 255),
+                filled: true,
               ),
               obscureText: true,
             ),
@@ -58,7 +65,12 @@ class _LoginPageState extends State<LoginPage> {
                 // Forget Password
                 TextButton(
                   onPressed: () {
-                    // TODO: Implement forget password functionality
+                    // Implement forget password functionality
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ForgetPasswordPage()),
+                    );
                   },
                   child: const Text('Forget Password'),
                 ),
@@ -76,7 +88,10 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 TextButton(
                   onPressed: () {
-                    // TODO: Implement sign up functionality
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignUpPage()),
+                    );
                   },
                   child: const Text('First time here? Sign up now'),
                 ),
