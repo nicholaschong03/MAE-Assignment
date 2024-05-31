@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "768333745626",
+    "project_id": "mae-assignment-d12c8",
+    "storage_bucket": "mae-assignment-d12c8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:768333745626:android:e43fbd15d8e3569c8984e3",
+        "android_client_info": {
+          "package_name": "com.example.jom_eat_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVARTYK4QbCtaffqd8Sv6PmEZ6FU5Jjv0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

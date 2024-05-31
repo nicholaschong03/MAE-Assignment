@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -6,10 +8,64 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+
+  bool _isEmailValid = true;
+  bool _isPasswordValid = true;
+
+  void _validateInputs() {
+    setState(() {
+      _isEmailValid = _emailController.text.isNotEmpty;
+      _isPasswordValid = _passwordController.text.isNotEmpty;
+    });
+
+    if (_isEmailValid && _isPasswordValid) {
+      _signUpUser();
+    }
+  }
+
+  Future<void> _signUpUser() async {
+    try {
+      // Create user with Firebase Authentication
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      // Store user data in Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+        'email': _emailController.text,
+        'role': 'foodie', // Default role, you can change it based on your logic
+        'name': _nameController.text,
+        'username': _usernameController.text,
+      });
+
+      // Redirect to specific page based on role
+      _redirectToPageBasedOnRole(userCredential.user?.uid);
+    } catch (e) {
+      print('Failed to sign up: $e');
+      // Handle error (e.g., show a Snackbar)
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Sign up failed: $e'),
+      ));
+    }
+  }
+
+  Future<void> _redirectToPageBasedOnRole(String? userId) async {
+    if (userId == null) return;
+
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    String userRole = userDoc.get('role');
+
+    if (userRole == 'admin') {
+      Navigator.pushReplacementNamed(context, '/adminPage');
+    } else {
+      Navigator.pushReplacementNamed(context, '/userPage');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +84,7 @@ class _SignUpPageState extends State<SignUpPage> {
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Sign up as a new user', // Changed title
+                'Sign up as a new user',
                 style: TextStyle(
                   color: Colors.orange,
                   fontSize: 28.0,
@@ -46,6 +102,39 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             const SizedBox(height: 20.0),
             TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                errorText: _isEmailValid ? null : 'Please enter a valid email',
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                labelStyle: const TextStyle(
+                  color: Colors.orange,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                labelText: 'Password',
+                errorText: _isPasswordValid ? null : 'Please enter a valid password',
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                labelStyle: const TextStyle(
+                  color: Colors.orange,
+                ),
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 16.0),
+            TextField(
               controller: _nameController,
               decoration: const InputDecoration(
                 labelText: 'Name',
@@ -59,7 +148,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 16.0), // Add space between text fields
+            const SizedBox(height: 16.0),
             TextField(
               controller: _usernameController,
               decoration: const InputDecoration(
@@ -74,59 +163,10 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 16.0), // Add space between text fields
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                labelStyle: TextStyle(
-                  color: Colors.orange,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16.0), // Add space between text fields
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                labelStyle: TextStyle(
-                  color: Colors.orange,
-                ),
-              ),
-              obscureText: true,
-            ),
             const SizedBox(height: 16.0),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Perform sign up logic here
-                  String name = _nameController.text;
-                  String username = _usernameController.text;
-                  String email = _emailController.text;
-                  String password = _passwordController.text;
-
-                  // Validate and process the user input
-                  // ...
-
-                  // Clear the text fields
-                  _nameController.clear();
-                  _usernameController.clear();
-                  _emailController.clear();
-                  _passwordController.clear();
-                },
-                child: const Text('Sign Up'),
-              ),
+            ElevatedButton(
+              onPressed: _validateInputs,
+              child: const Text('Sign Up'),
             ),
           ],
         ),
