@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
+import 'package:jom_eat_project/adminpage/adminpage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key});
@@ -9,6 +12,67 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isEmailValid = true;
+  bool _isPasswordValid = true;
+
+  void _validateInputs() {
+    setState(() {
+      _isEmailValid = _emailController.text.isNotEmpty;
+      _isPasswordValid = _passwordController.text.isNotEmpty;
+    });
+
+    if (_isEmailValid && _isPasswordValid) {
+      _loginUser();
+    }
+  }
+
+  Future<void> _loginUser() async {
+    try {
+      // Sign in with Firebase Authentication
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      // Redirect to specific page based on role
+      _redirectToPageBasedOnRole(userCredential.user?.uid);
+    } catch (e) {
+      print('Failed to log in: $e');
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Login failed: $e'),
+      ));
+    }
+  }
+
+  Future<void> _redirectToPageBasedOnRole(String? userId) async {
+    if (userId == null) return;
+
+    DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    String userRole = userDoc.get('role');
+
+    if (userRole == 'foodie') {
+      Navigator.pushReplacementNamed(context, '/userPage');
+    } else if (userRole == 'admin') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AdminPage()),
+      );
+    } else if (userRole == 'content_creator') {
+      Navigator.pushReplacementNamed(context, '/managerPage');
+    } else {
+      // Handle unknown user role
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Unknown User'),
+      ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,29 +91,34 @@ class _LoginPageState extends State<LoginPage> {
               height: 200,
             ),
             const SizedBox(height: 16.0),
-            // Username TextField
-            const TextField(
+            // Email TextField
+            TextField(
+              controller: _emailController,
               decoration: InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(
+                labelText: 'Email',
+                errorText: _isEmailValid ? null : 'Please enter a valid email',
+                border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),
-                labelStyle: TextStyle(
+                labelStyle: const TextStyle(
                   color: Colors.orange,
                 ),
-                fillColor: Color.fromARGB(255, 255, 255, 255),
+                fillColor: const Color.fromARGB(255, 255, 255, 255),
                 filled: true,
               ),
             ),
             const SizedBox(height: 16.0),
             // Password TextField
-            const TextField(
+            TextField(
+              controller: _passwordController,
               decoration: InputDecoration(
                 labelText: 'Password',
-                border: OutlineInputBorder(
+                errorText:
+                    _isPasswordValid ? null : 'Please enter a valid password',
+                border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),
-                labelStyle: TextStyle(
+                labelStyle: const TextStyle(
                   color: Colors.orange,
                 ),
                 fillColor: Color.fromARGB(255, 255, 255, 255),
@@ -65,7 +134,6 @@ class _LoginPageState extends State<LoginPage> {
                 // Forget Password
                 TextButton(
                   onPressed: () {
-                    // Implement forget password functionality
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -76,9 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 // Login Button
                 ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement login functionality
-                  },
+                  onPressed: _validateInputs,
                   child: const Text('Login'),
                 ),
               ],
