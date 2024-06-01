@@ -16,6 +16,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _isEmailValid = true;
   bool _isPasswordValid = true;
+  String? _selectedRole = 'foodie'; // Default role identifier
+
+  final Map<String, String> roleMap = {
+    'Foodie': 'foodie',
+    'Content Creator': 'cc',
+  };
 
   void _validateInputs() {
     setState(() {
@@ -46,7 +52,7 @@ class _SignUpPageState extends State<SignUpPage> {
           .doc(userCredential.user?.uid)
           .set({
         'email': _emailController.text,
-        'role': 'foodie',
+        'role': _selectedRole,
         'name': _nameController.text,
         'username': _usernameController.text,
       });
@@ -58,16 +64,18 @@ class _SignUpPageState extends State<SignUpPage> {
               'Sign up successful! Please check your email to verify your account.'),
         ),
       );
-
       // Redirect to login page
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Sign up failed: The email had already been used, If you can't remember the password, kindly reset the password"),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              "Sign up failed: The email had already been used, If you can't remember the password, kindly reset the password"),
+        ),
+      );
     }
   }
 
@@ -169,9 +177,58 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
             ),
             const SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _validateInputs,
-              child: const Text('Sign Up'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: DropdownButtonFormField<String>(
+                    value: roleMap.entries
+                        .firstWhere((entry) => entry.value == _selectedRole)
+                        .key,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedRole = roleMap[newValue];
+                      });
+                    },
+                    items: roleMap.keys
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    style: const TextStyle(
+                      color: Colors.orange,
+                    ),
+                    dropdownColor: Colors.white,
+                    icon: const Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.orange,
+                      size: 30,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Select Role',
+                      labelStyle: TextStyle(
+                        color: Colors.orange,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16.0),
+                Expanded(
+                  flex: 1,
+                  child: ElevatedButton(
+                    onPressed: _validateInputs,
+                    child: const Text('Sign Up'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
