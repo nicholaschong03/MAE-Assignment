@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:jom_eat_project/Loginpage/login.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -30,40 +31,43 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _signUpUser() async {
     try {
       // Create user with Firebase Authentication
-      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
+      // Send email verification
+      await userCredential.user?.sendEmailVerification();
+
       // Store user data in Firestore
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .set({
         'email': _emailController.text,
-        'role': 'foodie', // Default role, you can change it based on your logic
+        'role': 'foodie',
         'name': _nameController.text,
         'username': _usernameController.text,
       });
 
-      // Redirect to specific page based on role
-      _redirectToPageBasedOnRole(userCredential.user?.uid);
+      // Notify the user to verify their email
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'Sign up successful! Please check your email to verify your account.'),
+        ),
+      );
+
+      // Redirect to login page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
     } catch (e) {
-      print('Failed to sign up: $e');
-      // Handle error (e.g., show a Snackbar)
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Sign up failed: $e'),
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Sign up failed: The email had already been used, If you can't remember the password, kindly reset the password"),
       ));
-    }
-  }
-
-  Future<void> _redirectToPageBasedOnRole(String? userId) async {
-    if (userId == null) return;
-
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    String userRole = userDoc.get('role');
-
-    if (userRole == 'admin') {
-      Navigator.pushReplacementNamed(context, '/adminPage');
-    } else {
-      Navigator.pushReplacementNamed(context, '/userPage');
     }
   }
 
@@ -121,7 +125,8 @@ class _SignUpPageState extends State<SignUpPage> {
               controller: _passwordController,
               decoration: InputDecoration(
                 labelText: 'Password',
-                errorText: _isPasswordValid ? null : 'Please enter a valid password',
+                errorText:
+                    _isPasswordValid ? null : 'Please enter a valid password',
                 border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),

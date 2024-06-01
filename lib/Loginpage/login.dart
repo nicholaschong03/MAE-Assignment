@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
-import 'package:jom_eat_project/adminpage/adminpage.dart';
+
+import '../adminpage/adminpage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key});
@@ -38,8 +39,17 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
-      // Redirect to specific page based on role
-      _redirectToPageBasedOnRole(userCredential.user?.uid);
+      // Check if email is verified
+      if (userCredential.user?.emailVerified ?? false) {
+        // Redirect to specific page based on role
+        _redirectToPageBasedOnRole(userCredential.user?.uid);
+      } else {
+        // Email is not verified, sign out the user and show a message
+        await FirebaseAuth.instance.signOut();
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please verify your email to log in.'),
+        ));
+      }
     } catch (e) {
       print('Failed to log in: $e');
       // Show error message
@@ -57,14 +67,20 @@ class _LoginPageState extends State<LoginPage> {
     String userRole = userDoc.get('role');
 
     if (userRole == 'foodie') {
-      Navigator.pushReplacementNamed(context, '/userPage');
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => FoodiePage()),
+      // );
     } else if (userRole == 'admin') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => AdminPage()),
       );
     } else if (userRole == 'content_creator') {
-      Navigator.pushReplacementNamed(context, '/managerPage');
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => ContentCreatorPage()),
+      // );
     } else {
       // Handle unknown user role
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -103,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                 labelStyle: const TextStyle(
                   color: Colors.orange,
                 ),
-                fillColor: const Color.fromARGB(255, 255, 255, 255),
+                fillColor: Color.fromARGB(255, 255, 255, 255),
                 filled: true,
               ),
             ),
