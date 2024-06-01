@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'login.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({super.key});
@@ -17,13 +18,17 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
       await _auth.sendPasswordResetEmail(email: _emailController.text);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Password reset email sent'),
+          content: Text('Password reset email sent, Please check your email to reset the password'),
         ),
+      ); // Redirect to login page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to send password reset email: $e'),
+        const SnackBar(
+          content: Text('Failed to send password reset email: Please recheck the email that you input'),
         ),
       );
     }

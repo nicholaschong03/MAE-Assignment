@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
-
 import '../adminpage/adminpage.dart';
 
 class LoginPage extends StatefulWidget {
@@ -41,20 +40,16 @@ class _LoginPageState extends State<LoginPage> {
 
       // Check if email is verified
       if (userCredential.user?.emailVerified ?? false) {
-        // Redirect to specific page based on role
         _redirectToPageBasedOnRole(userCredential.user?.uid);
       } else {
-        // Email is not verified, sign out the user and show a message
         await FirebaseAuth.instance.signOut();
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Please verify your email to log in.'),
         ));
       }
     } catch (e) {
-      print('Failed to log in: $e');
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Login failed: $e'),
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Login failed: Your email or password is not correct'),
       ));
     }
   }
@@ -76,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
         context,
         MaterialPageRoute(builder: (context) => AdminPage()),
       );
-    } else if (userRole == 'content_creator') {
+    } else if (userRole == 'cc') {
       // Navigator.pushReplacement(
       //   context,
       //   MaterialPageRoute(builder: (context) => ContentCreatorPage()),
