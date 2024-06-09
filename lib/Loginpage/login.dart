@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage/adminpage.dart';
@@ -89,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 255, 234, 207),
+          color: Color(0xFFF9E4BC),
         ),
         padding: const EdgeInsets.all(30.0),
         child: Column(
@@ -111,9 +112,6 @@ class _LoginPageState extends State<LoginPage> {
                 border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),
-                labelStyle: const TextStyle(
-                  color: Colors.orange,
-                ),
                 fillColor: Color.fromARGB(255, 255, 255, 255),
                 filled: true,
               ),
@@ -128,9 +126,6 @@ class _LoginPageState extends State<LoginPage> {
                     _isPasswordValid ? null : 'Please enter a valid password',
                 border: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                labelStyle: const TextStyle(
-                  color: Colors.orange,
                 ),
                 fillColor: Color.fromARGB(255, 255, 255, 255),
                 filled: true,
@@ -151,12 +146,14 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context) => ForgetPasswordPage()),
                     );
                   },
-                  child: const Text('Forget Password'),
+                  child: const Text('Forget Password',
+                      style: TextStyle(color: Color(0xFFF35000))),
                 ),
                 // Login Button
                 ElevatedButton(
                   onPressed: _validateInputs,
-                  child: const Text('Login'),
+                  child: const Text('Login',
+                      style: TextStyle(color: Color(0xFFF35000))),
                 ),
               ],
             ),
@@ -170,7 +167,8 @@ class _LoginPageState extends State<LoginPage> {
                       MaterialPageRoute(builder: (context) => SignUpPage()),
                     );
                   },
-                  child: const Text('First time here? Sign up now'),
+                  child: const Text('First time here? Sign up now',
+                      style: TextStyle(color: Color(0xFFF35000))),
                 ),
               ],
             ),

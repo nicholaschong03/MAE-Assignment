@@ -18,7 +18,8 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
       await _auth.sendPasswordResetEmail(email: _emailController.text);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Password reset email sent, Please check your email to reset the password'),
+          content: Text(
+              'Password reset email sent, Please check your email to reset the password'),
         ),
       ); // Redirect to login page
       Navigator.pushReplacement(
@@ -28,7 +29,8 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to send password reset email: Please recheck the email that you input'),
+          content: Text(
+              'Failed to send password reset email: Please recheck the email that you input'),
         ),
       );
     }
@@ -40,7 +42,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
       appBar: AppBar(
         title: const Text('Forget Password'),
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 234, 207),
+      backgroundColor: const Color(0xFFF9E4BC),
       body: Container(
         padding: const EdgeInsets.all(25),
         child: Column(
@@ -51,8 +53,8 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
               child: Text(
                 'Enter your email to reset your password',
                 style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.orange,
+                  fontSize: 20.0,
+                  color: Color(0xFFF35000),
                 ),
               ),
             ),
@@ -71,7 +73,10 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 onPressed: _resetPassword,
-                child: const Text('Reset Password'),
+                child: const Text(
+                  'Reset Password',
+                  style: TextStyle(fontSize: 16.0, color: Color(0xFFF35000)),
+                ),
               ),
             ),
           ],
