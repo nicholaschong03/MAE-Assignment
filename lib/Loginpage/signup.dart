@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jom_eat_project/Loginpage/login.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -87,7 +88,10 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: Text(
+          'Sign Up as a New User',
+          style: GoogleFonts.georama(fontSize: 24.0, letterSpacing: 0.5),
+        ),
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -100,22 +104,14 @@ class _SignUpPageState extends State<SignUpPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Sign up as a new user',
-                    style: TextStyle(
-                      color: Colors.orange,
-                      fontSize: 28.0,
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          color: Color.fromARGB(255, 133, 133, 133),
-                          offset: Offset(2, 2),
-                          blurRadius: 3,
-                        ),
-                      ],
+                    'Please filled in the details below',
+                    style: GoogleFonts.georama(
+                      color: const Color(0xFFF35000),
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
@@ -132,7 +128,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     filled: true,
                     fillColor: Colors.white,
                     labelStyle: const TextStyle(
-                      color: Colors.orange,
+                      color: Color(0xFFF88232),
                     ),
                   ),
                 ),
@@ -150,7 +146,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     filled: true,
                     fillColor: Colors.white,
                     labelStyle: const TextStyle(
-                      color: Colors.orange,
+                      color: Color(0xFFF88232),
                     ),
                   ),
                   obscureText: true,
@@ -166,7 +162,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     filled: true,
                     fillColor: Colors.white,
                     labelStyle: TextStyle(
-                      color: Colors.orange,
+                      color: Color(0xFFF88232),
                     ),
                   ),
                 ),
@@ -181,7 +177,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     filled: true,
                     fillColor: Colors.white,
                     labelStyle: TextStyle(
-                      color: Colors.orange,
+                      color: Color(0xFFF88232),
                     ),
                   ),
                 ),
@@ -208,18 +204,18 @@ class _SignUpPageState extends State<SignUpPage> {
                           );
                         }).toList(),
                         style: const TextStyle(
-                          color: Colors.orange,
+                          color: Color(0xFFF88232),
                         ),
                         dropdownColor: Colors.white,
                         icon: const Icon(
                           Icons.arrow_drop_down,
-                          color: Colors.orange,
+                          color: Color(0xFFF88232),
                           size: 30,
                         ),
                         decoration: const InputDecoration(
                           labelText: 'Select Role',
                           labelStyle: TextStyle(
-                            color: Colors.orange,
+                            color: Color(0xFFF88232),
                           ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
@@ -234,7 +230,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       flex: 1,
                       child: ElevatedButton(
                         onPressed: _validateInputs,
-                        child: const Text('Sign Up'),
+                        child: Text(
+                          'Sign Up',
+                          style: GoogleFonts.poppins(
+                            color: const Color(0xFFF88232),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ),
                   ],

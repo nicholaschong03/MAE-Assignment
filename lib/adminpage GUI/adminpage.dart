@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'home.dart';
 import 'notification.dart';
 import 'profile.dart';
 import 'setting.dart';
 import 'reports.dart';
 
-
 class AdminPage extends StatefulWidget {
-  const AdminPage({super.key});
+  const AdminPage({Key? key}) : super(key: key);
 
   @override
   _AdminPageState createState() => _AdminPageState();
@@ -30,7 +30,8 @@ class _AdminPageState extends State<AdminPage> {
     QuerySnapshot snapshot = await firestore
         .collection('notifications')
         .where('read_status', isEqualTo: false)
-        .where('to', isEqualTo: 'admin') // Check if the notification is for admin
+        .where('to',
+            isEqualTo: 'admin') // Check if the notification is for admin
         .get();
 
     setState(() {
@@ -54,18 +55,25 @@ class _AdminPageState extends State<AdminPage> {
               _hasUnreadNotifications
                   ? Icons.notifications_active_rounded
                   : Icons.notifications_rounded,
-              color: _hasUnreadNotifications ? Colors.orange : Colors.grey,
+              color: _hasUnreadNotifications
+                  ? const Color(0xFFF88232)
+                  : Colors.grey,
             ),
             onPressed: () {
               // show notifications page
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const NotificationsPage()),
-              ).then((value) => _checkForUnreadNotifications()); // Recheck for unread notifications when returning
+                MaterialPageRoute(
+                    builder: (context) => const NotificationsPage()),
+              ).then((value) =>
+                  _checkForUnreadNotifications()); // Recheck for unread notifications when returning
             },
           ),
         ],
-        title: const Text('JomEat'),
+        title: Text(
+          'Jom Eat',
+          style: GoogleFonts.bungeeSpice(fontSize: 24.0, letterSpacing: 1.0),
+        ),
         leading: Image.asset('assets/images/logo.png'),
       ),
       body: IndexedStack(
@@ -98,13 +106,12 @@ class _AdminPageState extends State<AdminPage> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.orange,
+        selectedItemColor: const Color(0xFFF88232),
         unselectedItemColor: Colors.grey,
+        selectedLabelStyle: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.bold),
+        unselectedLabelStyle: GoogleFonts.lato(fontSize: 12),
         onTap: _onItemTapped,
       ),
     );
   }
 }
-
-
-

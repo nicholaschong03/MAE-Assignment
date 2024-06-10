@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
-import '../adminpage/adminpage.dart';
+import '../adminpage GUI/adminpage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -154,8 +155,12 @@ class _LoginPageState extends State<LoginPage> {
                     // Login Button
                     ElevatedButton(
                       onPressed: _validateInputs,
-                      child: const Text('Login',
-                          style: TextStyle(color: Color(0xFFF35000))),
+                      child: Text('Login',
+                          style: GoogleFonts.poppins(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                          ),),
                     ),
                   ],
                 ),
