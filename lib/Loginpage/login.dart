@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/widgets.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage/adminpage.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key});
+  const LoginPage({Key? key}) : super(key: key);
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -93,86 +93,90 @@ class _LoginPageState extends State<LoginPage> {
           color: Color(0xFFF9E4BC),
         ),
         padding: const EdgeInsets.all(30.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo
-            Image.asset(
-              'assets/images/logo.png',
-              width: 200,
-              height: 200,
-            ),
-            const SizedBox(height: 16.0),
-            // Email TextField
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                errorText: _isEmailValid ? null : 'Please enter a valid email',
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                fillColor: Color.fromARGB(255, 255, 255, 255),
-                filled: true,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            // Password TextField
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                errorText:
-                    _isPasswordValid ? null : 'Please enter a valid password',
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                fillColor: Color.fromARGB(255, 255, 255, 255),
-                filled: true,
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16.0),
-            // Row containing Forget Password and Login buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Center(
+          child: SingleChildScrollView(
+            key: const Key('scrollable'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Forget Password
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ForgetPasswordPage()),
-                    );
-                  },
-                  child: const Text('Forget Password',
-                      style: TextStyle(color: Color(0xFFF35000))),
+                // Logo
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 200,
+                  height: 200,
                 ),
-                // Login Button
-                ElevatedButton(
-                  onPressed: _validateInputs,
-                  child: const Text('Login',
-                      style: TextStyle(color: Color(0xFFF35000))),
+                const SizedBox(height: 16.0),
+                // Email TextField
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    errorText: _isEmailValid ? null : 'Please enter a valid email',
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
+                    fillColor: Color.fromARGB(255, 255, 255, 255),
+                    filled: true,
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                // Password TextField
+                TextField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    errorText: _isPasswordValid ? null : 'Please enter a valid password',
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
+                    fillColor: Color.fromARGB(255, 255, 255, 255),
+                    filled: true,
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 16.0),
+                // Row containing Forget Password and Login buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Forget Password
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ForgetPasswordPage()),
+                        );
+                      },
+                      child: const Text('Forget Password',
+                          style: TextStyle(color: Color(0xFFF35000))),
+                    ),
+                    // Login Button
+                    ElevatedButton(
+                      onPressed: _validateInputs,
+                      child: const Text('Login',
+                          style: TextStyle(color: Color(0xFFF35000))),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignUpPage()),
+                        );
+                      },
+                      child: const Text('First time here? Sign up now',
+                          style: TextStyle(color: Color(0xFFF35000))),
+                    ),
+                  ],
                 ),
               ],
             ),
-            // Row containing Sign Up button aligned to the left
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignUpPage()),
-                    );
-                  },
-                  child: const Text('First time here? Sign up now',
-                      style: TextStyle(color: Color(0xFFF35000))),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
