@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jom_eat_project/Loginpage/login.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:jom_eat_project/verification.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -26,12 +27,18 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _validateInputs() {
     setState(() {
-      _isEmailValid = _emailController.text.isNotEmpty;
-      _isPasswordValid = _passwordController.text.isNotEmpty;
+      _isEmailValid = verifyEmail(_emailController.text);
+      _isPasswordValid = verifyPassword(_passwordController.text);
     });
 
     if (_isEmailValid && _isPasswordValid) {
       _signUpUser();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('(Password must be at least 8 characters, include 1 uppercase, 1 number, and 1 special character (!@#\$%^&*)'),
+        ),
+      );
     }
   }
 
@@ -60,6 +67,7 @@ class _SignUpPageState extends State<SignUpPage> {
         'phone': '',
         'signedUpAt': FieldValue.serverTimestamp(),
         'profileImage': '',
+        'isSuspended': false,
       });
 
       // Notify the user to verify their email
@@ -107,7 +115,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Please filled in the details below',
+                    'Please fill in the details below',
                     style: GoogleFonts.georama(
                       color: const Color(0xFFF35000),
                       fontSize: 24.0,

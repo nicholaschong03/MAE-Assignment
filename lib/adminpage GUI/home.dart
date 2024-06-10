@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:jom_eat_project/adminfunction/user_manage.dart';
+import 'package:jom_eat_project/adminfunction/event_manage.dart';
 
 class HomePanel extends StatelessWidget {
   const HomePanel({Key? key}) : super(key: key);
@@ -17,13 +19,19 @@ class HomePanel extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      // Add your button 1 logic here
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UserManagementPage()),
+                      );
                     },
                     child: const Text('User Management'),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // Add your button 2 logic here
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>  const EventManagePage()),
+                      );
                     },
                     child: const Text('Event Management'),
                   ),
