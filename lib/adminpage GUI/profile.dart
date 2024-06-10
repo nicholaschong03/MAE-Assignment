@@ -196,7 +196,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Phone: ${userData['phone'] ?? 'No phone'}',
+                    'Phone(+60): ${userData['phone'] ?? 'No phone'}',
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 8),
