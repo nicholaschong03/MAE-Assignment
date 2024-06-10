@@ -45,41 +45,47 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
       backgroundColor: const Color(0xFFF9E4BC),
       body: Container(
         padding: const EdgeInsets.all(25),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Enter your email to reset your password',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: Color(0xFFF35000),
+        child: Center(
+          child: SingleChildScrollView(
+            key: const Key('scrollable'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Enter your email to reset your password',
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      color: Color(0xFFF35000),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: _resetPassword,
-                child: const Text(
-                  'Reset Password',
-                  style: TextStyle(fontSize: 16.0, color: Color(0xFFF35000)),
+                const SizedBox(height: 16.0),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: _resetPassword,
+                    child: const Text(
+                      'Reset Password',
+                      style:
+                          TextStyle(fontSize: 16.0, color: Color(0xFFF35000)),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

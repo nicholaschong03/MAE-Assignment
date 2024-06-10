@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'notification.dart';
 import 'home.dart';
+import 'notification.dart';
 import 'profile.dart';
+import 'setting.dart';
+import 'reports.dart';
+
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
+
   @override
-  // Creates the state for the AdminPage widget.
-  _AdminPageState createState() => _AdminPageState(); 
+  _AdminPageState createState() => _AdminPageState();
 }
 
 class _AdminPageState extends State<AdminPage> {
@@ -27,8 +30,7 @@ class _AdminPageState extends State<AdminPage> {
     QuerySnapshot snapshot = await firestore
         .collection('notifications')
         .where('read_status', isEqualTo: false)
-        .where('to',
-            isEqualTo: 'admin') // Check if the notification is for admin
+        .where('to', isEqualTo: 'admin') // Check if the notification is for admin
         .get();
 
     setState(() {
@@ -59,8 +61,7 @@ class _AdminPageState extends State<AdminPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const NotificationsPage()),
-              ).then((value) =>
-                  _checkForUnreadNotifications()); // Recheck for unread notifications when returning
+              ).then((value) => _checkForUnreadNotifications()); // Recheck for unread notifications when returning
             },
           ),
         ],
@@ -69,7 +70,7 @@ class _AdminPageState extends State<AdminPage> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children:  <Widget>[
+        children: const <Widget>[
           HomePanel(),
           SettingPanel(),
           ReportsPanel(),
@@ -107,24 +108,3 @@ class _AdminPageState extends State<AdminPage> {
 
 
 
-class SettingPanel extends StatelessWidget {
-  const SettingPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Settings Panel'),
-    );
-  }
-}
-
-class ReportsPanel extends StatelessWidget {
-  const ReportsPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Reports Panel'),
-    );
-  }
-}
