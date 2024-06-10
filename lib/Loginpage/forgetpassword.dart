@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'login.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
@@ -40,7 +41,10 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Forget Password'),
+        title: Text(
+          'Forget Password',
+          style: GoogleFonts.georama(fontSize: 24.0, letterSpacing: 0.5),
+        ),
       ),
       backgroundColor: const Color(0xFFF9E4BC),
       body: Container(
@@ -51,13 +55,13 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Enter your email to reset your password',
-                    style: TextStyle(
+                    'Enter your recovery email',
+                    style: GoogleFonts.georama(
                       fontSize: 20.0,
-                      color: Color(0xFFF35000),
+                      color: const Color(0xFFF35000),
                     ),
                   ),
                 ),
@@ -76,10 +80,12 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton(
                     onPressed: _resetPassword,
-                    child: const Text(
+                    child: Text(
                       'Reset Password',
-                      style:
-                          TextStyle(fontSize: 16.0, color: Color(0xFFF35000)),
+                      style: GoogleFonts.georama(
+                        fontSize: 16.0,
+                        color: const Color(0xFFF35000),
+                      ),
                     ),
                   ),
                 ),

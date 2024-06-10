@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:jom_eat_project/Loginpage/login.dart';
-import 'adminpage/adminpage.dart';
+import 'adminpage GUI/adminpage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,3 +19,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+ 

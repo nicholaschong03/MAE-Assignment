@@ -174,7 +174,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
                         },
                         child: const Text(
                           'Edit Profile',
-                          style: TextStyle(color: Colors.orange),
+                          style: TextStyle(color: Color(0xFFF88232)),
                         ),
                       ),
                     ],
