@@ -4,8 +4,9 @@ import 'package:jom_eat_project/adminfunction/user_manage.dart';
 import 'package:jom_eat_project/adminfunction/event_manage.dart';
 
 class HomePanel extends StatelessWidget {
-  const HomePanel({Key? key}) : super(key: key);
+  final String userId;
 
+  const HomePanel({super.key, required this.userId});
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -21,7 +22,7 @@ class HomePanel extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const UserManagementPage()),
+                        MaterialPageRoute(builder: (context) => UserManagementPage(userID : userId)),
                       );
                     },
                     child: Text('User Management',style: GoogleFonts.georama(

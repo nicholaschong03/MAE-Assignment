@@ -240,8 +240,8 @@ class _SignUpPageState extends State<SignUpPage> {
                         onPressed: _validateInputs,
                         child: Text(
                           'Sign Up',
-                          style: GoogleFonts.poppins(
-                            color: const Color(0xFFF88232),
+                          style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
                             fontSize: 16.0,
                             fontWeight: FontWeight.w500,
                           ),

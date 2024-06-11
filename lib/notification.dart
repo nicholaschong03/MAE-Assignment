@@ -2,11 +2,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class NotificationsPage extends StatelessWidget {
-  const NotificationsPage({super.key});
+class NotificationService {
+  Future<void> sendNotification(String title, String content, String from, {String? to, String? role}) async {
+    await FirebaseFirestore.instance.collection('notifications').add({
+      'title': title,
+      'content': content,
+      'fromID': from,
+      'toID': to,
+      'toRole': role,
+      'time': FieldValue.serverTimestamp(),
+      'read_status': false,
+    });
+  }
+}
 
-  Future<void> _showNotificationDialog(
-      BuildContext context, DocumentSnapshot notification) async {
+class NotificationsPage extends StatelessWidget {
+  final String userId;
+  final String? role;
+
+  const NotificationsPage({required this.userId, this.role, super.key});
+
+  Future<void> _showNotificationDialog(BuildContext context, DocumentSnapshot notification) async {
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -36,15 +52,11 @@ class NotificationsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Notifications',
-          style:  GoogleFonts.arvo(fontSize: 24.0, letterSpacing: 0.5),
+          style: GoogleFonts.arvo(fontSize: 24.0, letterSpacing: 0.5),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('notifications')
-            .where('to',
-                isEqualTo: 'admin') // Ensure only admin notifications are shown
-            .snapshots(),
+        stream: _getNotificationStream(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -58,8 +70,9 @@ class NotificationsPage extends StatelessWidget {
               return ListTile(
                 tileColor: isRead ? Colors.white : Colors.orange[100],
                 title: Text(notification['title']),
-                subtitle: Text(
-                    notification['time'].toDate().toString()), // Add this line
+                subtitle: Text(notification['time'] != null
+                    ? (notification['time'] as Timestamp).toDate().toString()
+                    : ''),
                 onTap: () {
                   _showNotificationDialog(context, notification);
                 },
@@ -69,5 +82,16 @@ class NotificationsPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Stream<QuerySnapshot> _getNotificationStream() {
+    final notificationsCollection = FirebaseFirestore.instance.collection('notifications');
+    if (role != null) {
+      // If role is specified, filter by role
+      return notificationsCollection.where('toRole', isEqualTo: role).snapshots();
+    } else {
+      // Otherwise, filter by userId
+      return notificationsCollection.where('toID', isEqualTo: userId).snapshots();
+    }
   }
 }

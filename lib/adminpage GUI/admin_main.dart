@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../notification.dart';
 import 'home.dart';
-import 'notification.dart';
 import 'profile.dart';
 import 'feedback.dart';
 import 'reports.dart';
 
 class AdminPage extends StatefulWidget {
-  const AdminPage({Key? key}) : super(key: key);
+  final String userId;
+  final String role;
+
+  const AdminPage({Key? key, required this.userId, required this.role}) : super(key: key);
 
   @override
   _AdminPageState createState() => _AdminPageState();
@@ -30,8 +33,7 @@ class _AdminPageState extends State<AdminPage> {
     QuerySnapshot snapshot = await firestore
         .collection('notifications')
         .where('read_status', isEqualTo: false)
-        .where('to',
-            isEqualTo: 'admin') // Check if the notification is for admin
+        .where('toRole', isEqualTo: widget.role) // Check if the notification is for admin
         .get();
 
     setState(() {
@@ -60,13 +62,13 @@ class _AdminPageState extends State<AdminPage> {
                   : Colors.grey,
             ),
             onPressed: () {
-              // show notifications page
+              // Show notifications page
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const NotificationsPage()),
-              ).then((value) =>
-                  _checkForUnreadNotifications()); // Recheck for unread notifications when returning
+                  builder: (context) => NotificationsPage(userId: widget.userId, role: widget.role),
+                ),
+              ).then((value) => _checkForUnreadNotifications()); // Recheck for unread notifications when returning
             },
           ),
         ],
@@ -78,11 +80,11 @@ class _AdminPageState extends State<AdminPage> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: const <Widget>[
-          HomePanel(),
+        children: <Widget>[
+          HomePanel(userId: widget.userId),
           FeedbackPanel(),
           ReportsPanel(),
-          ProfilePanel(),
+          ProfilePanel(userId: widget.userId),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
