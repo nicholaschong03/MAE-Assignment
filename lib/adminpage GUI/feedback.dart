@@ -1,13 +1,13 @@
 
 import 'package:flutter/material.dart';
 
-class SettingPanel extends StatelessWidget {
-  const SettingPanel();
+class FeedbackPanel extends StatelessWidget {
+  const FeedbackPanel();
 
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('Settings Panel'),
+      child: Text('Feedback Panel'),
     );
   }
 }

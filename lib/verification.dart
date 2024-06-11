@@ -9,11 +9,12 @@ bool verifyPassword(String password) {
   return password.isNotEmpty && passwordRegex.hasMatch(password);
 }
 
-bool verifyPhoneNumber(String phoneNumber) {
-  // Check if phone number is in number form and has the correct length based on the prefix
-  if (phoneNumber.startsWith('11')) {
-    return int.tryParse(phoneNumber) != null && phoneNumber.length == 10;
-  } else {
-    return int.tryParse(phoneNumber) != null && phoneNumber.length == 9;
+  bool verifyPhoneNumber(String phoneNumber) {
+    // Allow empty input or valid phone number lengths based on the prefix
+    if (phoneNumber.isEmpty) return true;
+    if (phoneNumber.startsWith('11')) {
+      return int.tryParse(phoneNumber) != null && phoneNumber.length == 10;
+    } else {
+      return int.tryParse(phoneNumber) != null && phoneNumber.length == 9;
+    }
   }
-}
