@@ -85,6 +85,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                       style: GoogleFonts.georama(
                         fontSize: 16.0,
                         color: const Color(0xFFF35000),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),

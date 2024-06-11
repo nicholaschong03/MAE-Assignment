@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../Loginpage/login.dart';
@@ -9,7 +10,9 @@ import 'package:intl/intl.dart';
 import 'package:jom_eat_project/verification.dart';
 
 class ProfilePanel extends StatefulWidget {
-  const ProfilePanel({super.key});
+  final String userId;
+
+  const ProfilePanel({super.key, required this.userId});
 
   @override
   _ProfilePanelState createState() => _ProfilePanelState();
@@ -18,24 +21,35 @@ class ProfilePanel extends StatefulWidget {
 class _ProfilePanelState extends State<ProfilePanel> {
   late Future<Map<String, dynamic>> _userDataFuture;
   File? _image;
+  List<String> _defaultImageUrls = [];
 
   @override
   void initState() {
     super.initState();
     _userDataFuture = getUserData();
+    _fetchDefaultImages();
   }
 
   Future<Map<String, dynamic>> getUserData() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      DocumentSnapshot userData = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      return userData.data() as Map<String, dynamic>;
-    } else {
-      throw Exception("No user logged in");
-    }
+    DocumentSnapshot userData = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .get();
+    return userData.data() as Map<String, dynamic>;
+  }
+
+  Future<void> _fetchDefaultImages() async {
+    final ListResult result = await FirebaseStorage.instance
+        .ref()
+        .child('default_pictures')
+        .listAll();
+
+    final List<String> urls = await Future.wait(
+        result.items.map((Reference ref) => ref.getDownloadURL()).toList());
+
+    setState(() {
+      _defaultImageUrls = urls;
+    });
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -54,14 +68,11 @@ class _ProfilePanelState extends State<ProfilePanel> {
   Future<void> _uploadImage() async {
     if (_image == null) return;
 
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
     try {
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('profile_pictures')
-          .child('${user.uid}.jpg');
+          .child('${widget.userId}.jpg');
 
       await storageRef.putFile(_image!);
 
@@ -69,7 +80,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
 
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(user.uid)
+          .doc(widget.userId)
           .update({'profileImage': downloadUrl});
 
       setState(() {
@@ -86,7 +97,89 @@ class _ProfilePanelState extends State<ProfilePanel> {
     }
   }
 
+  void _showImageOptions(BuildContext context, String profileImageUrl) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.visibility),
+                title: const Text('Preview'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showImagePreview(context, profileImageUrl);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Select New'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showImageSourceActionSheet(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showImagePreview(BuildContext context, String profileImageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Image.network(profileImageUrl),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showImageSourceActionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Select from Device'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showDeviceOptions(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.image),
+                title: const Text('Select Default'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showDefaultImageOptions(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeviceOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -116,6 +209,58 @@ class _ProfilePanelState extends State<ProfilePanel> {
     );
   }
 
+  void _showDefaultImageOptions(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Default Image'),
+          content: SingleChildScrollView(
+            child: Wrap(
+              spacing: 10.0,
+              children: _defaultImageUrls.map((url) {
+                return GestureDetector(
+                  onTap: () {
+                    _setImage(url);
+                    Navigator.of(context).pop();
+                  },
+                  child: Image.network(
+                    url,
+                    width: 50,
+                    height: 50,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _setImage(String url) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .update({'profileImage': url});
+
+    setState(() {
+      _userDataFuture = getUserData();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile image updated to default image.')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -140,11 +285,16 @@ class _ProfilePanelState extends State<ProfilePanel> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: profileImageUrl.startsWith('http')
-                        ? NetworkImage(profileImageUrl)
-                        : AssetImage(profileImageUrl) as ImageProvider,
+                  GestureDetector(
+                    onTap: () {
+                      _showImageOptions(context, profileImageUrl);
+                    },
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: profileImageUrl.startsWith('http')
+                          ? NetworkImage(profileImageUrl)
+                          : AssetImage(profileImageUrl) as ImageProvider,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.camera_alt),
@@ -213,8 +363,6 @@ class _ProfilePanelState extends State<ProfilePanel> {
                                   TextButton(
                                     onPressed: () {
                                       if (verifyPhoneNumber(newPhone)) {
-                                        User? user =
-                                            FirebaseAuth.instance.currentUser;
                                         // Perform the update operation here
                                         Map<String, dynamic> updateData = {};
                                         if (newName.isNotEmpty) {
@@ -226,7 +374,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
                                         updateData['phone'] = newPhone;
                                         FirebaseFirestore.instance
                                             .collection('users')
-                                            .doc(user!.uid)
+                                            .doc(widget.userId)
                                             .update(updateData)
                                             .then((_) {
                                           ScaffoldMessenger.of(context)
@@ -322,7 +470,13 @@ class _ProfilePanelState extends State<ProfilePanel> {
                         onPressed: () {
                           // Add your logic for updating policy here
                         },
-                        child: const Text('Update Policy'),
+                        child: Text(
+                          'Update Policy',
+                          style: GoogleFonts.georama(
+                              color: const Color(0xFFF88232),
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500),
+                        ),
                       ),
                     ],
                   ),
@@ -352,7 +506,13 @@ class _ProfilePanelState extends State<ProfilePanel> {
                             );
                           });
                         },
-                        child: const Text('Reset Password'),
+                        child: Text(
+                          'Reset Password',
+                          style: GoogleFonts.georama(
+                              color: const Color(0xFFF88232),
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500),
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () {
@@ -388,7 +548,13 @@ class _ProfilePanelState extends State<ProfilePanel> {
                             },
                           );
                         },
-                        child: const Text('Logout'),
+                        child: Text(
+                          'Logout',
+                          style: GoogleFonts.georama(
+                              color: const Color(0xFFF88232),
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500),
+                        ),
                       ),
                     ],
                   ),

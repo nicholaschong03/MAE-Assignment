@@ -67,17 +67,18 @@ class _LoginPageState extends State<LoginPage> {
     if (userRole == 'foodie' && !isSuspended) {
       // Navigator.pushReplacement(
       //   context,
-      //   MaterialPageRoute(builder: (context) => FoodiePage()),
+      //   MaterialPageRoute(builder: (context) => FoodiePage(userId: userId, role: userRole)),
       // );
     } else if (userRole == 'admin' && !isSuspended) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AdminPage()),
+        MaterialPageRoute(
+            builder: (context) => AdminPage(userId: userId, role: userRole)),
       );
     } else if (userRole == 'cc' && !isSuspended) {
       // Navigator.pushReplacement(
       //   context,
-      //   MaterialPageRoute(builder: (context) => ContentCreatorPage()),
+      //   MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
       // );
     } else {
       // Handle unknown user role or suspended user
@@ -113,11 +114,12 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    errorText: _isEmailValid ? null : 'Please enter a valid email',
+                    errorText:
+                        _isEmailValid ? null : 'Please enter a valid email',
                     border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
-                    fillColor: Color.fromARGB(255, 255, 255, 255),
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
                     filled: true,
                   ),
                 ),
@@ -127,11 +129,13 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    errorText: _isPasswordValid ? null : 'Please enter a valid password',
+                    errorText: _isPasswordValid
+                        ? null
+                        : 'Please enter a valid password',
                     border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
-                    fillColor: Color.fromARGB(255, 255, 255, 255),
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
                     filled: true,
                   ),
                   obscureText: true,
@@ -150,18 +154,25 @@ class _LoginPageState extends State<LoginPage> {
                               builder: (context) => ForgetPasswordPage()),
                         );
                       },
-                      child: const Text('Forget Password',
-                          style: TextStyle(color: Color(0xFFF35000))),
+                      child: Text(
+                        'Forget Password',
+                        style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500),
+                      ),
                     ),
                     // Login Button
                     ElevatedButton(
                       onPressed: _validateInputs,
-                      child: Text('Login',
-                          style: GoogleFonts.poppins(
-                            color: const Color(0xFFF35000),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
-                          ),),
+                      child: Text(
+                        'Login',
+                        style: GoogleFonts.georama(
+                          color: const Color(0xFFF35000),
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -175,8 +186,13 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialPageRoute(builder: (context) => SignUpPage()),
                         );
                       },
-                      child: const Text('First time here? Sign up now',
-                          style: TextStyle(color: Color(0xFFF35000))),
+                      child: Text(
+                        'First time here? Sign up now',
+                        style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500),
+                      ),
                     ),
                   ],
                 ),
