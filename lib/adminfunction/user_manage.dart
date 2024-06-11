@@ -15,118 +15,80 @@ class _UserManagementPageState extends State<UserManagementPage> {
   String _searchQuery = '';
 
   Future<void> _showUserManagementDialog(
-      BuildContext context, DocumentSnapshot userData) async {
-    TextEditingController nameController =
-        TextEditingController(text: userData['name']);
-    TextEditingController roleController =
-        TextEditingController(text: userData['role']);
-    TextEditingController phoneController =
-        TextEditingController(text: userData['phone']);
-    TextEditingController usernameController =
-        TextEditingController(text: userData['username']);
+    BuildContext context, DocumentSnapshot userData) async {
+  TextEditingController roleController =
+      TextEditingController(text: userData['role']);
 
-    bool isSuspended = userData['isSuspended'] ?? false;
-    bool _isPhoneValid = true;
+  bool isSuspended = userData['isSuspended'] ?? false;
 
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Edit: ${userData['name']}'),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Name'),
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: userData['role'],
-                      items: const [
-                        DropdownMenuItem<String>(
-                          value: 'cc',
-                          child: Text('Content Creator'),
-                        ),
-                        DropdownMenuItem<String>(
-                          value: 'foodie',
-                          child: Text('Foodie'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        roleController.text = value!;
-                      },
-                      decoration: const InputDecoration(labelText: 'Role'),
-                    ),
-                    TextField(
-                      controller: phoneController,
-                      decoration: InputDecoration(
-                        labelText: 'Phone (+60)',
-                        errorText: _isPhoneValid ? null : 'Please enter a valid phone number',
+  await showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Edit: ${userData['name']}'),
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: userData['role'],
+                    items: const [
+                      DropdownMenuItem<String>(
+                        value: 'cc',
+                        child: Text('Content Creator'),
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          _isPhoneValid = verifyPhoneNumber(value);
-                        });
-                      },
-                    ),
-                    TextField(
-                      controller: usernameController,
-                      decoration: const InputDecoration(labelText: 'Username'),
-                    ),
-                  ],
-                ),
+                      DropdownMenuItem<String>(
+                        value: 'foodie',
+                        child: Text('Foodie'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      roleController.text = value!;
+                    },
+                    decoration: const InputDecoration(labelText: 'Role'),
+                  ),
+                ],
               ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text(isSuspended ? 'Reinstate' : 'Suspend'),
-                  onPressed: () {
-                    FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userData.id)
-                        .update({
-                      'isSuspended': !isSuspended,
-                    });
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: const Text('Update'),
-                  onPressed: () {
-                    if (_isPhoneValid) {
-                      FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(userData.id)
-                          .update({
-                        'name': nameController.text,
-                        'role': roleController.text,
-                        'phone': phoneController.text,
-                        'username': usernameController.text,
-                      });
-                      Navigator.of(context).pop();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please enter a valid phone number.'),
-                        ),
-                      );
-                    }
-                  },
-                ),
-                TextButton(
-                  child: const Text('Close'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text(isSuspended ? 'Reinstate' : 'Suspend'),
+                onPressed: () {
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userData.id)
+                      .update({
+                    'isSuspended': !isSuspended,
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Update'),
+                onPressed: () {
+                  FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userData.id)
+                      .update({
+                    'role': roleController.text,
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+} 
 
   String _getRoleDisplayName(String role) {
     switch (role) {
@@ -144,20 +106,20 @@ class _UserManagementPageState extends State<UserManagementPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'User Management Page',
-          style: GoogleFonts.arvo(fontSize: 24.0, letterSpacing: 0.5),
+          'User Manage',
+          style: GoogleFonts.arvo(fontSize: 24.0),
         ),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _searchController,
               decoration: const InputDecoration(
                 labelText: 'Search by Username',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(45))),
+                prefixIcon: Icon(Icons.search_rounded),
               ),
               onChanged: (value) {
                 setState(() {
@@ -190,7 +152,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                   itemBuilder: (context, index) {
                     var user = filteredUsers[index];
                     var profileImageUrl = user['profileImage'] ??
-                        'https://via.placeholder.com/150';
+                        'https://via.placeholder.com/200';
                     var isSuspended = user['isSuspended'] ?? false;
                     return ListTile(
                       leading: CircleAvatar(

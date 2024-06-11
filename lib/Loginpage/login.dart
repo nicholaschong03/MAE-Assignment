@@ -62,26 +62,27 @@ class _LoginPageState extends State<LoginPage> {
     DocumentSnapshot userDoc =
         await FirebaseFirestore.instance.collection('users').doc(userId).get();
     String userRole = userDoc.get('role');
+    bool isSuspended = userDoc.get('isSuspended');
 
-    if (userRole == 'foodie') {
+    if (userRole == 'foodie' && !isSuspended) {
       // Navigator.pushReplacement(
       //   context,
       //   MaterialPageRoute(builder: (context) => FoodiePage()),
       // );
-    } else if (userRole == 'admin') {
+    } else if (userRole == 'admin' && !isSuspended) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => AdminPage()),
+        MaterialPageRoute(builder: (context) => const AdminPage()),
       );
-    } else if (userRole == 'cc') {
+    } else if (userRole == 'cc' && !isSuspended) {
       // Navigator.pushReplacement(
       //   context,
       //   MaterialPageRoute(builder: (context) => ContentCreatorPage()),
       // );
     } else {
-      // Handle unknown user role
+      // Handle unknown user role or suspended user
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Unknown User'),
+        content: Text('Unknown User or Suspended User'),
       ));
     }
   }

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'home.dart';
 import 'notification.dart';
 import 'profile.dart';
-import 'setting.dart';
+import 'feedback.dart';
 import 'reports.dart';
 
 class AdminPage extends StatefulWidget {
@@ -80,7 +80,7 @@ class _AdminPageState extends State<AdminPage> {
         index: _selectedIndex,
         children: const <Widget>[
           HomePanel(),
-          SettingPanel(),
+          FeedbackPanel(),
           ReportsPanel(),
           ProfilePanel(),
         ],
@@ -93,8 +93,8 @@ class _AdminPageState extends State<AdminPage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings_rounded),
-            label: 'Settings',
+            icon: Icon(Icons.feedback_rounded),
+            label: 'Feedbacks',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart_rounded),

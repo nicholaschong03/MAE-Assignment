@@ -24,7 +24,11 @@ class HomePanel extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => const UserManagementPage()),
                       );
                     },
-                    child: const Text('User Management'),
+                    child: Text('User Management',style: GoogleFonts.georama(
+                      color: const Color(0xFFF88232),
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500,
+                    ),),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -33,7 +37,11 @@ class HomePanel extends StatelessWidget {
                         MaterialPageRoute(builder: (context) =>  const EventManagePage()),
                       );
                     },
-                    child: const Text('Event Management'),
+                    child: Text('Event Management',style: GoogleFonts.georama(
+                      color: const Color(0xFFF88232),
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500,
+                    ),),
                   ),
                 ],
               ),
@@ -44,11 +52,11 @@ class HomePanel extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Recent Posts',
-                  style: GoogleFonts.nunitoSans(
-                    color: const Color(0xFFF88232),
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: GoogleFonts.georama(
+                      color: const Color(0xFFF88232),
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w500,
+                    ),
                 ),
               ),
             ],

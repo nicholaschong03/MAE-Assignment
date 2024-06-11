@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import '../Loginpage/login.dart';
 import 'package:intl/intl.dart';
+import 'package:jom_eat_project/verification.dart';
 
 class ProfilePanel extends StatefulWidget {
   const ProfilePanel({super.key});
@@ -13,6 +17,7 @@ class ProfilePanel extends StatefulWidget {
 
 class _ProfilePanelState extends State<ProfilePanel> {
   late Future<Map<String, dynamic>> _userDataFuture;
+  File? _image;
 
   @override
   void initState() {
@@ -33,6 +38,84 @@ class _ProfilePanelState extends State<ProfilePanel> {
     }
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.getImage(source: source);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+
+      await _uploadImage();
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_image == null) return;
+
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_pictures')
+          .child('${user.uid}.jpg');
+
+      await storageRef.putFile(_image!);
+
+      final downloadUrl = await storageRef.getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'profileImage': downloadUrl});
+
+      setState(() {
+        _userDataFuture = getUserData();
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile image updated successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to upload image: $e')),
+      );
+    }
+  }
+
+  void _showImageSourceActionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Library'),
+                onTap: () {
+                  _pickImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
+                onTap: () {
+                  _pickImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -51,14 +134,23 @@ class _ProfilePanelState extends State<ProfilePanel> {
             );
           } else if (snapshot.hasData) {
             var userData = snapshot.data!;
+            var profileImageUrl =
+                userData['profileImage'] ?? 'https://via.placeholder.com/150';
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 50,
-                    backgroundImage: AssetImage(
-                        'assets/images/logo.png'), // Placeholder image
+                    backgroundImage: profileImageUrl.startsWith('http')
+                        ? NetworkImage(profileImageUrl)
+                        : AssetImage(profileImageUrl) as ImageProvider,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.camera_alt),
+                    onPressed: () {
+                      _showImageSourceActionSheet(context);
+                    },
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -79,6 +171,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
                               String newName = userData['name'] ?? '';
                               String newUsername = userData['username'] ?? '';
                               String newPhone = userData['phone'] ?? '';
+
                               return AlertDialog(
                                 title: const Text('Edit Profile'),
                                 content: Column(
@@ -119,45 +212,54 @@ class _ProfilePanelState extends State<ProfilePanel> {
                                 actions: <Widget>[
                                   TextButton(
                                     onPressed: () {
-                                      User? user =
-                                          FirebaseAuth.instance.currentUser;
-                                      // Perform the update operation here
-                                      Map<String, dynamic> updateData = {};
-                                      if (newName.isNotEmpty) {
-                                        updateData['name'] = newName;
-                                      }
-                                      if (newUsername.isNotEmpty) {
-                                        updateData['username'] = newUsername;
-                                      }
-                                      if (newPhone.isNotEmpty) {
+                                      if (verifyPhoneNumber(newPhone)) {
+                                        User? user =
+                                            FirebaseAuth.instance.currentUser;
+                                        // Perform the update operation here
+                                        Map<String, dynamic> updateData = {};
+                                        if (newName.isNotEmpty) {
+                                          updateData['name'] = newName;
+                                        }
+                                        if (newUsername.isNotEmpty) {
+                                          updateData['username'] = newUsername;
+                                        }
                                         updateData['phone'] = newPhone;
-                                      }
-                                      FirebaseFirestore.instance
-                                          .collection('users')
-                                          .doc(user!.uid)
-                                          .update(updateData)
-                                          .then((_) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                'Profile updated successfully!'),
-                                          ),
-                                        );
-                                        // Refresh the profile panel
-                                        setState(() {
-                                          _userDataFuture = getUserData();
+                                        FirebaseFirestore.instance
+                                            .collection('users')
+                                            .doc(user!.uid)
+                                            .update(updateData)
+                                            .then((_) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  'Profile updated successfully!'),
+                                            ),
+                                          );
+                                          // Refresh the profile panel
+                                          setState(() {
+                                            _userDataFuture = getUserData();
+                                          });
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
+                                        }).catchError((error) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  'Failed to update profile!'),
+                                            ),
+                                          );
                                         });
-                                        Navigator.of(context).pop();
-                                      }).catchError((error) {
+                                      } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           const SnackBar(
                                             content: Text(
-                                                'Failed to update profile!'),
+                                                'Please enter a valid phone number.'),
                                           ),
                                         );
-                                      });
+                                      }
                                     },
                                     child: const Text('Save'),
                                   ),

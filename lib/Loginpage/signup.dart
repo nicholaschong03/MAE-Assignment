@@ -118,8 +118,8 @@ class _SignUpPageState extends State<SignUpPage> {
                     'Please fill in the details below',
                     style: GoogleFonts.georama(
                       color: const Color(0xFFF35000),
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.w400,
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -216,7 +216,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         dropdownColor: Colors.white,
                         icon: const Icon(
-                          Icons.arrow_drop_down,
+                          Icons.arrow_drop_down_rounded,
                           color: Color(0xFFF88232),
                           size: 30,
                         ),
