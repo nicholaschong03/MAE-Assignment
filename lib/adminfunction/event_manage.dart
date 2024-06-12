@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -68,7 +69,7 @@ class _EventManagePageState extends State<EventManagePage> {
                   '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']} \nLocation: ${event['restaurantName']}'
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_rounded),
+                  icon: const Icon(FeatherIcons.xCircle, color: Color(0xFFF35000)),
                   onPressed: () async {
                     bool confirm = await _showConfirmationDialog(context, 'Are you sure you want to revoke this event?');
                     if (confirm) {

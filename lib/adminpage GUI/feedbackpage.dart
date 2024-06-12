@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:jom_eat_project/adminfunction/feedback_service.dart';
@@ -138,7 +139,7 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.filter_list),
+              icon: const Icon(FeatherIcons.filter,color:  Color(0xFFF88232)),
               onPressed: _showFilterDialog,
             ),
           ],
