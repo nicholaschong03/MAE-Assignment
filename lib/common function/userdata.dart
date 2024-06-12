@@ -10,22 +10,13 @@ class UserData {
   UserData({required this.userId});
 
   Future<Map<String, dynamic>> getUserData() async {
-    DocumentSnapshot userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get();
+    DocumentSnapshot userData = await FirebaseFirestore.instance.collection('users').doc(userId).get();
     return userData.data() as Map<String, dynamic>;
   }
 
   Future<List<String>> fetchDefaultImages() async {
-    final ListResult result = await FirebaseStorage.instance
-        .ref()
-        .child('default_pictures')
-        .listAll();
-
-    final List<String> urls = await Future.wait(
-        result.items.map((Reference ref) => ref.getDownloadURL()).toList());
-
+    final ListResult result = await FirebaseStorage.instance.ref().child('default_pictures').listAll();
+    final List<String> urls = await Future.wait(result.items.map((Reference ref) => ref.getDownloadURL()).toList());
     return urls;
   }
 
@@ -41,37 +32,22 @@ class UserData {
 
   Future<void> uploadImage(File image) async {
     try {
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_pictures')
-          .child('$userId.jpg');
-
+      final storageRef = FirebaseStorage.instance.ref().child('profile_pictures').child('$userId.jpg');
       await storageRef.putFile(image);
-
       final downloadUrl = await storageRef.getDownloadURL();
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .update({'profileImage': downloadUrl});
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({'profileImage': downloadUrl});
     } catch (e) {
       throw Exception('Failed to upload image: $e');
     }
   }
 
   Future<void> setImage(String url) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .update({'profileImage': url});
+    await FirebaseFirestore.instance.collection('users').doc(userId).update({'profileImage': url});
   }
 
   Future<void> updateUserProfile(Map<String, dynamic> updateData) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .update(updateData);
+      await FirebaseFirestore.instance.collection('users').doc(userId).update(updateData);
     } catch (e) {
       throw Exception('Failed to update profile: $e');
     }
@@ -85,18 +61,9 @@ class UserData {
     required String role,
   }) async {
     try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: password);
       await userCredential.user?.sendEmailVerification();
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .set({
+      await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
         'email': email,
         'role': role,
         'name': name,
@@ -109,8 +76,37 @@ class UserData {
         'gender': 'Not specified',
       });
     } catch (e) {
-      throw Exception(
-          "Sign up failed: The email had already been used, If you can't remember the password, kindly reset the password");
+      throw Exception("Sign up failed: The email had already been used, If you can't remember the password, kindly reset the password");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getPolicies() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('policies').get();
+    return snapshot.docs.map((doc) => {
+      ...doc.data() as Map<String, dynamic>,
+      'id': doc.id,
+    }).toList();
+  }
+
+  Future<Map<String, dynamic>> getPolicy(String policyId) async {
+    DocumentSnapshot policyData = await FirebaseFirestore.instance.collection('policies').doc(policyId).get();
+    return policyData.data() as Map<String, dynamic>;
+  }
+
+  Future<void> updatePolicy(String policyId, Map<String, dynamic> updateData) async {
+    try {
+      await FirebaseFirestore.instance.collection('policies').doc(policyId).update(updateData);
+    } catch (e) {
+      throw Exception('Failed to update policy: $e');
+    }
+  }
+
+  Future<void> addPolicy(Map<String, dynamic> policyData) async {
+    try {
+      DocumentReference docRef = await FirebaseFirestore.instance.collection('policies').add(policyData);
+      await FirebaseFirestore.instance.collection('policies').doc(docRef.id).update({'id': docRef.id});
+    } catch (e) {
+      throw Exception('Failed to add policy: $e');
     }
   }
 }

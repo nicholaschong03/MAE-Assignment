@@ -212,8 +212,8 @@ class _EventManagePageState extends State<EventManagePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   _buildEventDetail(
-                    'Date & Time',
-                    '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} (${event['day']}) : ${event['startTime']} to ${event['endTime']}',
+                    'Date',
+                    '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} (${event['day']}) ${event['startTime']} to ${event['endTime']}',
                   ),
                   _buildEventDetail('Venue', event['restaurantName']),
                   _buildEventDetail('Cuisine Type', event['cuisineType']),

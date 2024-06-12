@@ -82,7 +82,7 @@ class _AdminPageState extends State<AdminPage> {
         index: _selectedIndex,
         children: <Widget>[
           HomePanel(userId: widget.userId),
-          FeedbackPanel(),
+          const FeedbackPanel(),
           ReportsPanel(),
           ProfilePanel(userId: widget.userId),
         ],
