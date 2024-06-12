@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/common%20function/notification.dart';
+import 'package:jom_eat_project/common%20function/user_services.dart';
 
 class UserManagementPage extends StatefulWidget {
-  final String userID;
-
-  const UserManagementPage({super.key, required this.userID});
+  late final String currentUser = UserData.getCurrentUserID();
+  UserManagementPage({super.key});
 
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
@@ -17,12 +17,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
   String _searchQuery = '';
   final NotificationService _notificationService = NotificationService(); // Instantiate NotificationService
 
-  Future<void> _showUserManagementDialog(
-      BuildContext context, DocumentSnapshot userData) async {
-    TextEditingController roleController =
-        TextEditingController(text: userData['role']);
+  Future<void> _showUserManagementDialog(BuildContext context, String userId) async {
+    UserData userData = UserData(userId: userId);
+    Map<String, dynamic> userDoc = await userData.getUserData();
 
-    bool isSuspended = userData['isSuspended'] ?? false;
+    TextEditingController roleController = TextEditingController(text: userDoc['role']);
+    bool isSuspended = userDoc['isSuspended'] ?? false;
 
     await showDialog<void>(
       context: context,
@@ -30,12 +30,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Edit: ${userData['name']}'),
+              title: Text('Edit: ${userDoc['name']}'),
               content: SingleChildScrollView(
                 child: Column(
                   children: [
                     DropdownButtonFormField<String>(
-                      value: userData['role'],
+                      value: userDoc['role'],
                       items: const [
                         DropdownMenuItem<String>(
                           value: 'cc',
@@ -61,18 +61,18 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     try {
                       await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(userData.id)
+                          .doc(userId)
                           .update({
                         'isSuspended': !isSuspended,
                       });
-                      if (isSuspended) {
+                      if (!isSuspended) {
                         // Send notification if the user is being reinstated
                         await _notificationService.sendNotification(
                           'Account Reinstated',
                           'Your account has been reinstated.',
-                          widget.userID,
-                          to: userData.id,
-                          role: userData['role'], // Send to the user's role
+                          widget.currentUser,
+                          to: userId,
+                          role: userDoc['role'], // Send to the user's role
                         );
                       }
                       Navigator.of(context).pop();
@@ -89,7 +89,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     try {
                       await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(userData.id)
+                          .doc(userId)
                           .update({
                         'role': roleController.text,
                       });
@@ -158,9 +158,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('users')
-                  .where('role',
-                      isNotEqualTo:
-                          'admin') // Ensure only non-admin users are shown
+                  .where('role', isNotEqualTo: 'admin') // Ensure only non-admin users are shown
                   .orderBy('signedUpAt', descending: true) // Order by signup date
                   .orderBy('role')
                   .snapshots(),
@@ -170,8 +168,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 }
                 var userData = snapshot.data!.docs;
                 var filteredUsers = userData.where((user) {
-                  var username =
-                      user['username']?.toString().toLowerCase() ?? '';
+                  var username = user['username']?.toString().toLowerCase() ?? '';
                   return username.contains(_searchQuery);
                 }).toList();
 
@@ -179,8 +176,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                   itemCount: filteredUsers.length,
                   itemBuilder: (context, index) {
                     var user = filteredUsers[index];
-                    var profileImageUrl = user['profileImage'] ??
-                        'https://via.placeholder.com/200';
+                    var profileImageUrl = user['profileImage'] ?? 'https://via.placeholder.com/200';
                     var isSuspended = user['isSuspended'] ?? false;
                     return ListTile(
                       leading: CircleAvatar(
@@ -198,7 +194,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                       trailing: IconButton(
                         icon: const Icon(Icons.more_vert),
                         onPressed: () {
-                          _showUserManagementDialog(context, user);
+                          _showUserManagementDialog(context, user.id);
                         },
                       ),
                     );

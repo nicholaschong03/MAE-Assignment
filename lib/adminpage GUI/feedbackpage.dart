@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:jom_eat_project/adminfunction/feedback_service.dart';
 
 class FeedbackPanel extends StatefulWidget {
   const FeedbackPanel({super.key});
@@ -14,6 +15,7 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
   DateTime? _selectedDate;
   String? _selectedTitle;
   List<String> _feedbackTitles = [];
+  final FeedbackService _feedbackService = FeedbackService();
 
   @override
   void initState() {
@@ -22,10 +24,7 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
   }
 
   void _fetchFeedbackTitles() async {
-    QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('feedback').get();
-    List<String> titles =
-        snapshot.docs.map((doc) => doc['title'] as String).toSet().toList();
+    List<String> titles = await _feedbackService.fetchFeedbackTitles();
     setState(() {
       _feedbackTitles = titles;
     });
@@ -41,8 +40,7 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
             style: GoogleFonts.raleway(fontSize: 20),
           ),
           content: Container(
-            width: MediaQuery.of(context).size.width *
-                0.8, // Set a fixed width for the dialog
+            width: MediaQuery.of(context).size.width * 0.8,
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -120,27 +118,6 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
     );
   }
 
-  Stream<QuerySnapshot> _getFeedbackStream() {
-    Query query = FirebaseFirestore.instance.collection('feedback');
-
-    if (_selectedDate != null) {
-      DateTime startOfDay = DateTime(
-          _selectedDate!.year, _selectedDate!.month, _selectedDate!.day);
-      DateTime endOfDay = DateTime(_selectedDate!.year, _selectedDate!.month,
-          _selectedDate!.day, 23, 59, 59);
-      query = query.where('createDate',
-          isGreaterThanOrEqualTo: startOfDay, isLessThanOrEqualTo: endOfDay);
-    }
-
-    if (_selectedTitle != null) {
-      query = query.where('title', isEqualTo: _selectedTitle);
-    }
-
-    query = query.orderBy('createDate', descending: true);
-
-    return query.snapshots();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -171,7 +148,7 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _getFeedbackStream(),
+              stream: _feedbackService.getFeedbackStream(_selectedDate, _selectedTitle),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
