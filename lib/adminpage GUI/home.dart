@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/adminfunction/user_manage.dart';
 import 'package:jom_eat_project/adminfunction/event_manage.dart';
+import 'package:jom_eat_project/common%20function/user_services.dart';
 
 class HomePanel extends StatelessWidget {
-  final String userId;
-
-  const HomePanel({super.key, required this.userId});
+  late final String currentUser = UserData.getCurrentUserID();
+  HomePanel({super.key});
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -22,7 +22,7 @@ class HomePanel extends StatelessWidget {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => UserManagementPage(userID : userId)),
+                        MaterialPageRoute(builder: (context) => UserManagementPage()),
                       );
                     },
                     child: Text('User Management',style: GoogleFonts.georama(

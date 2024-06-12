@@ -4,13 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../common function/notification.dart';
 import 'home.dart';
 import 'profile.dart';
-import 'feedback.dart';
+import 'feedbackpage.dart';
 import 'reports.dart';
 
 class AdminPage extends StatefulWidget {
   final String userId;
   final String role;
-
   const AdminPage({Key? key, required this.userId, required this.role}) : super(key: key);
 
   @override
@@ -81,10 +80,10 @@ class _AdminPageState extends State<AdminPage> {
       body: IndexedStack(
         index: _selectedIndex,
         children: <Widget>[
-          HomePanel(userId: widget.userId),
+          HomePanel(),
           const FeedbackPanel(),
           ReportsPanel(),
-          ProfilePanel(userId: widget.userId),
+          ProfilePanel(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

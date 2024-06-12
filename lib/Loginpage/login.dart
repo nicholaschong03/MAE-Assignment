@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage GUI/admin_main.dart';
+import '../common function/user_services.dart'; // Import UserService
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -33,14 +33,11 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loginUser() async {
     try {
-      // Sign in with Firebase Authentication
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
-      // Check if email is verified
       if (userCredential.user?.emailVerified ?? false) {
         _redirectToPageBasedOnRole(userCredential.user?.uid);
       } else {
@@ -59,31 +56,35 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _redirectToPageBasedOnRole(String? userId) async {
     if (userId == null) return;
 
-    DocumentSnapshot userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    String userRole = userDoc.get('role');
-    bool isSuspended = userDoc.get('isSuspended');
+    try {
+      Map<String, dynamic> userData = await UserData(userId: userId).getUserData();
+      String userRole = userData['role'];
+      bool isSuspended = userData['isSuspended'];
 
-    if (userRole == 'foodie' && !isSuspended) {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => FoodiePage(userId: userId, role: userRole)),
-      // );
-    } else if (userRole == 'admin' && !isSuspended) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => AdminPage(userId: userId, role: userRole)),
-      );
-    } else if (userRole == 'cc' && !isSuspended) {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
-      // );
-    } else {
-      // Handle unknown user role or suspended user
+      if (userRole == 'foodie' && !isSuspended) {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => FoodiePage(userId: userId, role: userRole)),
+        // );
+      } else if (userRole == 'admin' && !isSuspended) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => AdminPage(userId: userId, role: userRole)),
+        );
+      } else if (userRole == 'cc' && !isSuspended) {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
+        // );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Unknown User or Suspended User'),
+        ));
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Unknown User or Suspended User'),
+        content: Text('Failed to retrieve user data.'),
       ));
     }
   }

@@ -9,10 +9,6 @@ class UserData {
 
   UserData({required this.userId});
 
-  Future<Map<String, dynamic>> getUserData() async {
-    DocumentSnapshot userData = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    return userData.data() as Map<String, dynamic>;
-  }
 
   Future<List<String>> fetchDefaultImages() async {
     final ListResult result = await FirebaseStorage.instance.ref().child('default_pictures').listAll();
@@ -45,7 +41,7 @@ class UserData {
     await FirebaseFirestore.instance.collection('users').doc(userId).update({'profileImage': url});
   }
 
-  Future<void> updateUserProfile(Map<String, dynamic> updateData) async {
+  static Future<void> updateUserProfile(String userId, Map<String, dynamic> updateData) async {
     try {
       await FirebaseFirestore.instance.collection('users').doc(userId).update(updateData);
     } catch (e) {
@@ -79,4 +75,20 @@ class UserData {
       throw Exception("Sign up failed: The email had already been used, If you can't remember the password, kindly reset the password");
     }
   }
+
+  // Get current userID
+  static String getCurrentUserID() {
+    return FirebaseAuth.instance.currentUser?.uid ?? '';
+  }
+  
+  //get user data based on user id
+  Future<Map<String, dynamic>> getUserData() async {
+    try {
+      final DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      return snapshot.data() as Map<String, dynamic>;
+    } catch (e) {
+      throw Exception('Failed to get user data: $e');
+    }
+  }
+
 }

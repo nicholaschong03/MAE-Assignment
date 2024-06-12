@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jom_eat_project/Loginpage/login.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/common%20function/verification.dart';
-import 'package:jom_eat_project/common function/userdata.dart'; // Import the updated UserData class
+import 'package:jom_eat_project/common%20function/user_services.dart'; // Import the updated UserData class
 
 class SignUpPage extends StatefulWidget {
   @override

@@ -3,15 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:jom_eat_project/adminpage%20GUI/updatepolicy.dart';
+import '../adminpage GUI/updatepolicy.dart';
 import '../Loginpage/login.dart';
 import '../common function/verification.dart';
-import '../common function/userdata.dart';
+import '../common function/user_services.dart';
 
 class ProfilePanel extends StatefulWidget {
-  final String userId;
-
-  const ProfilePanel({super.key, required this.userId});
+  late final String currentUser = UserData.getCurrentUserID();
+  ProfilePanel({super.key});
 
   @override
   _ProfilePanelState createState() => _ProfilePanelState();
@@ -25,7 +24,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
   @override
   void initState() {
     super.initState();
-    userData = UserData(userId: widget.userId);
+    userData = UserData(userId: widget.currentUser);
     _userDataFuture = userData.getUserData();
     _fetchDefaultImages();
   }
@@ -215,7 +214,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
 
   Future<void> _updateUserProfile(Map<String, dynamic> updateData) async {
     try {
-      await userData.updateUserProfile(updateData);
+      await UserData.updateUserProfile(widget.currentUser , updateData);
       setState(() {
         _userDataFuture = userData.getUserData();
       });
@@ -416,7 +415,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => UpdatePolicyPage(userId: widget.userId),
+                                    builder: (context) => UpdatePolicyPage(userId: widget.currentUser),
                                   ),
                                 );
                               },

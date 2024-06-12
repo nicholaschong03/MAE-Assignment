@@ -29,7 +29,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Update Policy'),
+          title: const Text('Update Policy'),
           content: Container(
             width: 340,
             height: 200,
@@ -38,11 +38,11 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
               children: [
                 TextField(
                   controller: titleController,
-                  decoration: InputDecoration(labelText: 'Title'),
+                  decoration: const InputDecoration(labelText: 'Title'),
                 ),
                 TextField(
                   controller: detailsController,
-                  decoration: InputDecoration(labelText: 'Details'),
+                  decoration: const InputDecoration(labelText: 'Details'),
                 ),
               ],
             ),
@@ -50,7 +50,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -64,7 +64,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
                 });
                 Navigator.of(context).pop();
               },
-              child: Text('Update'),
+              child: const Text('Update'),
             ),
           ],
         );
@@ -80,7 +80,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Add Policy'),
+          title: const Text('Add Policy'),
           content: Container(
             width: 340,
             height: 200,
@@ -89,11 +89,11 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
               children: [
                 TextField(
                   controller: titleController,
-                  decoration: InputDecoration(labelText: 'Title'),
+                  decoration: const InputDecoration(labelText: 'Title'),
                 ),
                 TextField(
                   controller: detailsController,
-                  decoration: InputDecoration(labelText: 'Details'),
+                  decoration: const InputDecoration(labelText: 'Details'),
                 ),
               ],
             ),
@@ -101,7 +101,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -115,7 +115,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
                 });
                 Navigator.of(context).pop();
               },
-              child: Text('Add'),
+              child: const Text('Add'),
             ),
           ],
         );
@@ -158,7 +158,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddPolicyDialog,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
