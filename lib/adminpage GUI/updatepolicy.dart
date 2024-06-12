@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:jom_eat_project/common function/userdata.dart';
+import 'package:jom_eat_project/adminfunction/policy.dart'; // Import the new file
 
 class UpdatePolicyPage extends StatefulWidget {
   final String userId;
@@ -13,13 +12,13 @@ class UpdatePolicyPage extends StatefulWidget {
 
 class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
   late Future<List<Map<String, dynamic>>> _policiesFuture;
-  late UserData userData;
+  late PolicyData policyData; // Use PolicyData instead of UserData
 
   @override
   void initState() {
     super.initState();
-    userData = UserData(userId: widget.userId);
-    _policiesFuture = userData.getPolicies();
+    policyData = PolicyData(userId: widget.userId); // Initialize PolicyData
+    _policiesFuture = policyData.getPolicies();
   }
 
   void _showUpdateDialog(Map<String, dynamic> policy) {
@@ -59,9 +58,9 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
                   'title': titleController.text,
                   'details': detailsController.text,
                 };
-                await userData.updatePolicy(policy['id'], updateData);
+                await policyData.updatePolicy(policy['id'], updateData);
                 setState(() {
-                  _policiesFuture = userData.getPolicies();
+                  _policiesFuture = policyData.getPolicies();
                 });
                 Navigator.of(context).pop();
               },
@@ -110,9 +109,9 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
                   'title': titleController.text,
                   'details': detailsController.text,
                 };
-                await userData.addPolicy(newPolicy);
+                await policyData.addPolicy(newPolicy);
                 setState(() {
-                  _policiesFuture = userData.getPolicies();
+                  _policiesFuture = policyData.getPolicies();
                 });
                 Navigator.of(context).pop();
               },
@@ -128,7 +127,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Jom Eat Policies',style: GoogleFonts.arvo(fontSize: 24.0, letterSpacing: 0.5),),
+        title: const Text('Update Policies'),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _policiesFuture,
@@ -159,7 +158,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddPolicyDialog,
-        child: const Icon(Icons.add_rounded, color: Color(0xFFF35000),),
+        child: Icon(Icons.add),
       ),
     );
   }
