@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../notification.dart';
+import '../common function/notification.dart';
 import 'home.dart';
 import 'profile.dart';
 import 'feedback.dart';

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import '../Loginpage/login.dart';
 import 'package:intl/intl.dart';
-import 'package:jom_eat_project/verification.dart';
+import '../Loginpage/login.dart';
+import '../common function/verification.dart';
+import '../common function/userdata.dart';
 
 class ProfilePanel extends StatefulWidget {
   final String userId;
@@ -20,81 +18,41 @@ class ProfilePanel extends StatefulWidget {
 
 class _ProfilePanelState extends State<ProfilePanel> {
   late Future<Map<String, dynamic>> _userDataFuture;
-  File? _image;
+  late final UserData userData;
   List<String> _defaultImageUrls = [];
 
   @override
   void initState() {
     super.initState();
-    _userDataFuture = getUserData();
+    userData = UserData(userId: widget.userId);
+    _userDataFuture = userData.getUserData();
     _fetchDefaultImages();
   }
 
-  Future<Map<String, dynamic>> getUserData() async {
-    DocumentSnapshot userData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .get();
-    return userData.data() as Map<String, dynamic>;
-  }
-
   Future<void> _fetchDefaultImages() async {
-    final ListResult result = await FirebaseStorage.instance
-        .ref()
-        .child('default_pictures')
-        .listAll();
-
-    final List<String> urls = await Future.wait(
-        result.items.map((Reference ref) => ref.getDownloadURL()).toList());
-
+    final urls = await userData.fetchDefaultImages();
     setState(() {
       _defaultImageUrls = urls;
     });
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.getImage(source: source);
+    final image = await userData.pickImage(source);
 
-    if (pickedFile != null) {
+    if (image != null) {
+      await userData.uploadImage(image);
       setState(() {
-        _image = File(pickedFile.path);
+        _userDataFuture = userData.getUserData();
       });
 
-      await _uploadImage();
+      _showSnackBar('Profile image updated successfully!');
     }
   }
 
-  Future<void> _uploadImage() async {
-    if (_image == null) return;
-
-    try {
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profile_pictures')
-          .child('${widget.userId}.jpg');
-
-      await storageRef.putFile(_image!);
-
-      final downloadUrl = await storageRef.getDownloadURL();
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .update({'profileImage': downloadUrl});
-
-      setState(() {
-        _userDataFuture = getUserData();
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile image updated successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload image: $e')),
-      );
-    }
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   void _showImageOptions(BuildContext context, String profileImageUrl) {
@@ -247,17 +205,112 @@ class _ProfilePanelState extends State<ProfilePanel> {
   }
 
   Future<void> _setImage(String url) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .update({'profileImage': url});
-
+    await userData.setImage(url);
     setState(() {
-      _userDataFuture = getUserData();
+      _userDataFuture = userData.getUserData();
     });
+    _showSnackBar('Profile image updated to default image.');
+  }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile image updated to default image.')),
+  Future<void> _updateUserProfile(Map<String, dynamic> updateData) async {
+    try {
+      await userData.updateUserProfile(updateData);
+      setState(() {
+        _userDataFuture = userData.getUserData();
+      });
+      _showSnackBar('Profile updated successfully!');
+    } catch (e) {
+      _showSnackBar('Failed to update profile: $e');
+    }
+  }
+
+  void _showEditProfileDialog(Map<String, dynamic> userData) {
+    String newName = userData['name'] ?? '';
+    String newUsername = userData['username'] ?? '';
+    String newPhone = userData['phone'] ?? '';
+    String newGender = userData['gender'] ?? 'Not specified';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: TextEditingController(text: newName),
+                onChanged: (value) {
+                  newName = value;
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                ),
+              ),
+              TextField(
+                controller: TextEditingController(text: newUsername),
+                onChanged: (value) {
+                  newUsername = value;
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Username',
+                ),
+              ),
+              TextField(
+                controller: TextEditingController(text: newPhone),
+                onChanged: (value) {
+                  newPhone = value;
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number (+60)',
+                ),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: newGender,
+                onChanged: (String? newValue) {
+                  newGender = newValue!;
+                },
+                items: <String>['Not specified', 'Male', 'Female']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                decoration: const InputDecoration(
+                  labelText: 'Gender',
+                ),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                if (verifyPhoneNumber(newPhone)) {
+                  Map<String, dynamic> updateData = {
+                    'name': newName,
+                    'username': newUsername,
+                    'phone': newPhone,
+                    'gender': newGender,
+                  };
+                  _updateUserProfile(updateData);
+                  Navigator.of(context).pop();
+                } else {
+                  _showSnackBar('Please enter a valid phone number.');
+                }
+              },
+              child: const Text('Save'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -284,279 +337,166 @@ class _ProfilePanelState extends State<ProfilePanel> {
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  GestureDetector(
-                    onTap: () {
-                      _showImageOptions(context, profileImageUrl);
-                    },
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: profileImageUrl.startsWith('http')
-                          ? NetworkImage(profileImageUrl)
-                          : AssetImage(profileImageUrl) as ImageProvider,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.camera_alt),
-                    onPressed: () {
-                      _showImageSourceActionSheet(context);
-                    },
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          _showImageOptions(context, profileImageUrl);
+                        },
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundImage: profileImageUrl.startsWith('http')
+                              ? NetworkImage(profileImageUrl)
+                              : AssetImage(profileImageUrl) as ImageProvider,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              userData['username'] ?? 'No username',
+                              style: GoogleFonts.georama(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                _showEditProfileDialog(userData);
+                              },
+                              child: const Text(
+                                'Edit Profile',
+                                style: TextStyle(color: Color(0xFFF88232)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        userData['name'] ?? 'No name',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildProfileDetail('Name', userData['name'] ?? 'No name'),
+                        _buildProfileDetail('Email', userData['email'] ?? 'No email'),
+                        _buildProfileDetail('Role', userData['role'] ?? 'No role'),
+                        _buildProfileDetail('Gender', userData['gender'] ?? 'Not specified'),
+                        _buildProfileDetail('Phone(+60)', userData['phone'] ?? 'No phone'),
+                        _buildProfileDetail(
+                          'Joined',
+                          userData['signedUpAt'] != null
+                              ? DateFormat('yyyy-MM-dd HH:mm:ss').format(userData['signedUpAt'].toDate())
+                              : 'No join date',
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              String newName = userData['name'] ?? '';
-                              String newUsername = userData['username'] ?? '';
-                              String newPhone = userData['phone'] ?? '';
-
-                              return AlertDialog(
-                                title: const Text('Edit Profile'),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TextField(
-                                      controller:
-                                          TextEditingController(text: newName),
-                                      onChanged: (value) {
-                                        newName = value;
-                                      },
-                                      decoration: const InputDecoration(
-                                        labelText: 'Name',
-                                      ),
-                                    ),
-                                    TextField(
-                                      controller: TextEditingController(
-                                          text: newUsername),
-                                      onChanged: (value) {
-                                        newUsername = value;
-                                      },
-                                      decoration: const InputDecoration(
-                                        labelText: 'Username',
-                                      ),
-                                    ),
-                                    TextField(
-                                      controller:
-                                          TextEditingController(text: newPhone),
-                                      onChanged: (value) {
-                                        newPhone = value;
-                                      },
-                                      decoration: const InputDecoration(
-                                        labelText: 'Phone Number (+60)',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      if (verifyPhoneNumber(newPhone)) {
-                                        // Perform the update operation here
-                                        Map<String, dynamic> updateData = {};
-                                        if (newName.isNotEmpty) {
-                                          updateData['name'] = newName;
-                                        }
-                                        if (newUsername.isNotEmpty) {
-                                          updateData['username'] = newUsername;
-                                        }
-                                        updateData['phone'] = newPhone;
-                                        FirebaseFirestore.instance
-                                            .collection('users')
-                                            .doc(widget.userId)
-                                            .update(updateData)
-                                            .then((_) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                  'Profile updated successfully!'),
-                                            ),
-                                          );
-                                          // Refresh the profile panel
-                                          setState(() {
-                                            _userDataFuture = getUserData();
-                                          });
-                                          Navigator.of(context)
-                                              .pop(); // Close the dialog
-                                        }).catchError((error) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                  'Failed to update profile!'),
-                                            ),
-                                          );
-                                        });
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                'Please enter a valid phone number.'),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: const Text('Save'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('Cancel'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: const Text(
-                          'Edit Profile',
-                          style: TextStyle(color: Color(0xFFF88232)),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Username: ${userData['username'] ?? 'No username'}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Email: ${userData['email'] ?? 'No email'}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Role: ${userData['role'] ?? 'No role'}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Phone(+60): ${userData['phone'] ?? 'No phone'}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Joined: ${userData['signedUpAt'] != null ? DateFormat('yyyy-MM-dd HH:mm:ss').format(userData['signedUpAt'].toDate()) : 'No join date'}',
-                    style: const TextStyle(fontSize: 16),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  const TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Platform Policy',
-                      border: OutlineInputBorder(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 0),
+                    child: Column(
+                      children: [
+                        const TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Platform Policy',
+                            border: OutlineInputBorder(),
+                          ),
+                          // Add controller and onChanged for handling policy update
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                // Add your logic for updating policy here
+                              },
+                              child: Text(
+                                'Update Policy',
+                                style: GoogleFonts.georama(
+                                    color: const Color(0xFFF88232),
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                FirebaseAuth.instance
+                                    .sendPasswordResetEmail(
+                                  email: FirebaseAuth.instance.currentUser!.email!,
+                                )
+                                    .then((_) {
+                                  _showSnackBar('Password reset email sent successfully!');
+                                }).catchError((error) {
+                                  _showSnackBar('Failed to send password reset email!');
+                                });
+                              },
+                              child: Text(
+                                'Reset Password',
+                                style: GoogleFonts.georama(
+                                    color: const Color(0xFFF88232),
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Logout'),
+                                      content: const Text('Are you sure you want to logout?'),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          onPressed: () {
+                                            FirebaseAuth.instance.signOut().then((_) {
+                                              Navigator.of(context).pushReplacement(
+                                                MaterialPageRoute(
+                                                  builder: (context) => const LoginPage(),
+                                                ),
+                                              );
+                                            });
+                                          },
+                                          child: const Text('Yes'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: const Text('No'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              child: Text(
+                                'Logout',
+                                style: GoogleFonts.georama(
+                                    color: const Color(0xFFF88232),
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    // Add controller and onChanged for handling policy update
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // Add your logic for updating policy here
-                        },
-                        child: Text(
-                          'Update Policy',
-                          style: GoogleFonts.georama(
-                              color: const Color(0xFFF88232),
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          FirebaseAuth.instance
-                              .sendPasswordResetEmail(
-                            email: FirebaseAuth.instance.currentUser!.email!,
-                          )
-                              .then((_) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Password reset email sent successfully!'),
-                              ),
-                            );
-                          }).catchError((error) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Failed to send password reset email!'),
-                              ),
-                            );
-                          });
-                        },
-                        child: Text(
-                          'Reset Password',
-                          style: GoogleFonts.georama(
-                              color: const Color(0xFFF88232),
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Logout'),
-                                content: const Text(
-                                    'Are you sure you want to logout?'),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () {
-                                      FirebaseAuth.instance.signOut().then((_) {
-                                        Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const LoginPage(),
-                                          ),
-                                        );
-                                      });
-                                    },
-                                    child: const Text('Yes'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text('No'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: Text(
-                          'Logout',
-                          style: GoogleFonts.georama(
-                              color: const Color(0xFFF88232),
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -565,6 +505,16 @@ class _ProfilePanelState extends State<ProfilePanel> {
             return const Center(child: Text('No user data found'));
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildProfileDetail(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Text(
+        '$label: $value',
+        style: const TextStyle(fontSize: 16),
       ),
     );
   }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jom_eat_project/Loginpage/login.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:jom_eat_project/verification.dart';
+import 'package:jom_eat_project/common%20function/verification.dart';
+import 'package:jom_eat_project/common function/userdata.dart'; // Import the updated UserData class
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -36,7 +35,8 @@ class _SignUpPageState extends State<SignUpPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('(Password must be at least 8 characters, include 1 uppercase, 1 number, and 1 special character (!@#\$%^&*)'),
+          content: Text(
+              'Password must be at least 8 characters, include 1 uppercase, 1 number, and 1 special character (!@#\$%^&*)'),
         ),
       );
     }
@@ -44,40 +44,20 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Future<void> _signUpUser() async {
     try {
-      // Create user with Firebase Authentication
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      await UserData.signUpUser(
         email: _emailController.text,
         password: _passwordController.text,
+        name: _nameController.text,
+        username: _usernameController.text,
+        role: _selectedRole!,
       );
 
-      // Send email verification
-      await userCredential.user?.sendEmailVerification();
-
-      // Store user data in Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user?.uid)
-          .set({
-        'email': _emailController.text,
-        'role': _selectedRole,
-        'name': _nameController.text,
-        'username': _usernameController.text,
-        'id': userCredential.user?.uid,
-        'phone': '',
-        'signedUpAt': FieldValue.serverTimestamp(),
-        'profileImage': '',
-        'isSuspended': false,
-      });
-
-      // Notify the user to verify their email
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
               'Sign up successful! Please check your email to verify your account.'),
         ),
       );
-      // Redirect to login page
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),

@@ -64,24 +64,20 @@ class _EventManagePageState extends State<EventManagePage> {
               var event = events[index];
               return ListTile(
                 title: Text(event['title']),
-                subtitle: Text(event['description']),
+                subtitle: Text(
+                  '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']} \nLocation: ${event['restaurantName']}'
+                ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete),
+                  icon: const Icon(Icons.delete_rounded),
                   onPressed: () async {
                     bool confirm = await _showConfirmationDialog(context, 'Are you sure you want to revoke this event?');
                     if (confirm) {
                       try {
-                        await FirebaseFirestore.instance
-                            .collection('outingGroups')
-                            .doc(event.id)
-                            .delete();
+                        await FirebaseFirestore.instance.collection('outingGroups').doc(event.id).delete();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Event revoked successfully!')),
-                        );
+                            const SnackBar(content: Text('Event revoked successfully!')));
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to revoke event: $e')),
-                        );
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to revoke event: $e')));
                       }
                     }
                   },
@@ -173,60 +169,85 @@ class _EventManagePageState extends State<EventManagePage> {
 
   Future<bool> _showConfirmationDialog(BuildContext context, String message) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Confirm'),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: const Text('Confirm'),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Revoke Event'),
+              content: Text(message),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: const Text('Confirm'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   void _showEventDetailsDialog(BuildContext context, DocumentSnapshot event) {
-    final String userId = (event['createdByUser'] as DocumentReference).id;
+    final String hostUserId = (event['createdByUser'] as DocumentReference).id; // Get the user ID from the DocumentReference
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(event['title']),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _buildEventDetail('Date', DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate()) + ' (' + event['day'] + ')'),
-                _buildEventDetail('Start Time', event['startTime']),
-                _buildEventDetail('End Time', event['endTime']),
-                _buildEventDetail('Cuisine Type', event['cuisineType']),
-                _buildEventDetail('Restaurant Name', event['restaurantName']),
-                _buildEventDetail('Description', event['description']),
-                FutureBuilder<String>(
-                  future: _getUsernameFromUserId(userId),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      return _buildEventDetail('Created By', snapshot.data ?? 'Unknown');
-                    }
-                  },
-                ),
-              ],
+          title: Text(
+            event['title'],
+            style: GoogleFonts.raleway(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          content: Container(
+            width: 300, // Fixed width
+            height: 400, // Fixed height
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _buildEventDetail(
+                    'Date & Time',
+                    '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} (${event['day']}) : ${event['startTime']} to ${event['endTime']}',
+                  ),
+                  _buildEventDetail('Venue', event['restaurantName']),
+                  _buildEventDetail('Cuisine Type', event['cuisineType']),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Description:',
+                    style: GoogleFonts.raleway(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    event['description'],
+                    style: GoogleFonts.raleway(),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FutureBuilder<String>(
+                      future: _getUsernameFromUserId(hostUserId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          return Text(
+                            'by: ${snapshot.data ?? 'Unknown'}',
+                            style: GoogleFonts.raleway(fontWeight: FontWeight.bold),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: <Widget>[
@@ -242,8 +263,8 @@ class _EventManagePageState extends State<EventManagePage> {
     );
   }
 
-  Future<String> _getUsernameFromUserId(String userId) async {
-    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+  Future<String> _getUsernameFromUserId(String hostUserId) async {
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(hostUserId).get();
     if (userSnapshot.exists && userSnapshot.data() != null) {
       var data = userSnapshot.data() as Map<String, dynamic>;
       if (data.containsKey('username')) {
@@ -264,10 +285,13 @@ class _EventManagePageState extends State<EventManagePage> {
         children: <Widget>[
           Text(
             '$label: ',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: GoogleFonts.raleway(fontWeight: FontWeight.bold),
           ),
           Expanded(
-            child: Text(value),
+            child: Text(
+              value,
+              style: GoogleFonts.raleway(),
+            ),
           ),
         ],
       ),
