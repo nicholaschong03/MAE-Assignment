@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:jom_eat_project/adminpage%20GUI/updatepolicy.dart';
 import '../Loginpage/login.dart';
 import '../common function/verification.dart';
 import '../common function/userdata.dart';
@@ -20,7 +21,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
   late Future<Map<String, dynamic>> _userDataFuture;
   late final UserData userData;
   List<String> _defaultImageUrls = [];
-
+  
   @override
   void initState() {
     super.initState();
@@ -235,76 +236,79 @@ class _ProfilePanelState extends State<ProfilePanel> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Edit Profile'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: TextEditingController(text: newName),
-                onChanged: (value) {
-                  newName = value;
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                ),
-              ),
-              TextField(
-                controller: TextEditingController(text: newUsername),
-                onChanged: (value) {
-                  newUsername = value;
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Username',
-                ),
-              ),
-              TextField(
-                controller: TextEditingController(text: newPhone),
-                onChanged: (value) {
-                  newPhone = value;
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number (+60)',
-                ),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: newGender,
-                onChanged: (String? newValue) {
-                  newGender = newValue!;
-                },
-                items: <String>['Not specified', 'Male', 'Female']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                decoration: const InputDecoration(
-                  labelText: 'Gender',
-                ),
-              ),
-            ],
+          content: Container(
+            width: 300,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+          TextField(
+            controller: TextEditingController(text: newName),
+            onChanged: (value) {
+              newName = value;
+            },
+            decoration: const InputDecoration(
+              labelText: 'Name',
+            ),
+          ),
+          TextField(
+            controller: TextEditingController(text: newUsername),
+            onChanged: (value) {
+              newUsername = value;
+            },
+            decoration: const InputDecoration(
+              labelText: 'Username',
+            ),
+          ),
+          TextField(
+            controller: TextEditingController(text: newPhone),
+            onChanged: (value) {
+              newPhone = value;
+            },
+            decoration: const InputDecoration(
+              labelText: 'Phone Number (+60)',
+            ),
+          ),
+          const SizedBox(height: 8),
+          DropdownButtonFormField<String>(
+            value: newGender,
+            onChanged: (String? newValue) {
+              newGender = newValue!;
+            },
+            items: <String>['Not specified', 'Male', 'Female']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            decoration: const InputDecoration(
+              labelText: 'Gender',
+            ),
+          ),
+              ],
+            ),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                if (verifyPhoneNumber(newPhone)) {
-                  Map<String, dynamic> updateData = {
-                    'name': newName,
-                    'username': newUsername,
-                    'phone': newPhone,
-                    'gender': newGender,
-                  };
-                  _updateUserProfile(updateData);
-                  Navigator.of(context).pop();
-                } else {
-                  _showSnackBar('Please enter a valid phone number.');
-                }
+          if (verifyPhoneNumber(newPhone)) {
+            Map<String, dynamic> updateData = {
+              'name': newName,
+              'username': newUsername,
+              'phone': newPhone,
+              'gender': newGender,
+            };
+            _updateUserProfile(updateData);
+            Navigator.of(context).pop();
+          } else {
+            _showSnackBar('Please enter a valid phone number.');
+          }
               },
               child: const Text('Save'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+          Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
@@ -404,23 +408,20 @@ class _ProfilePanelState extends State<ProfilePanel> {
                     padding: const EdgeInsets.symmetric(horizontal: 0),
                     child: Column(
                       children: [
-                        const TextField(
-                          decoration: InputDecoration(
-                            labelText: 'Platform Policy',
-                            border: OutlineInputBorder(),
-                          ),
-                          // Add controller and onChanged for handling policy update
-                        ),
-                        const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             ElevatedButton(
                               onPressed: () {
-                                // Add your logic for updating policy here
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => UpdatePolicyPage(userId: widget.userId),
+                                  ),
+                                );
                               },
                               child: Text(
-                                'Update Policy',
+                                'Platform Policy',
                                 style: GoogleFonts.georama(
                                     color: const Color(0xFFF88232),
                                     fontSize: 16.0,
