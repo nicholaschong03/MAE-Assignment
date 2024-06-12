@@ -42,6 +42,8 @@ dependencies:
   google_fonts: ^6.2.1
   image_picker: ^0.8.4+4
   firebase_storage: ^11.7.7
+  iconsax: ^0.0.8
+  flutter_feather_icons: ^2.0.0+1
   
 
 dev_dependencies:
