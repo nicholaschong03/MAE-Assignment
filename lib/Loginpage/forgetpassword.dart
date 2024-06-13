@@ -46,7 +46,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
           style: GoogleFonts.georama(fontSize: 24.0, letterSpacing: 0.5),
         ),
       ),
-      backgroundColor: const Color(0xFFF9E4BC),
+      backgroundColor: const Color.fromARGB(255, 255, 234, 211),
       body: Container(
         padding: const EdgeInsets.all(25),
         child: Center(
@@ -73,6 +73,8 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16.0),

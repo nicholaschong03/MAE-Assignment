@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFFF9E4BC),
+          color:Color.fromARGB(255, 255, 234, 211),
         ),
         padding: const EdgeInsets.all(30.0),
         child: Center(

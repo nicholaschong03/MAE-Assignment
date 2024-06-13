@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:jom_eat_project/adminfunction/policy.dart'; // Import the new file
 
 class UpdatePolicyPage extends StatefulWidget {
@@ -22,8 +23,10 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
   }
 
   void _showUpdateDialog(Map<String, dynamic> policy) {
-    TextEditingController titleController = TextEditingController(text: policy['title'] ?? '');
-    TextEditingController detailsController = TextEditingController(text: policy['details'] ?? '');
+    TextEditingController titleController =
+        TextEditingController(text: policy['title'] ?? '');
+    TextEditingController detailsController =
+        TextEditingController(text: policy['details'] ?? '');
 
     showDialog(
       context: context,
@@ -146,7 +149,8 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
                 Map<String, dynamic> policy = policies[index];
                 return ListTile(
                   title: Text(policy['title'] ?? 'Title not found'),
-                  subtitle: JustifiedText(policy['details'] ?? 'Details not found'),
+                  subtitle:
+                      JustifiedText(policy['details'] ?? 'Details not found'),
                   onTap: () {
                     _showUpdateDialog(policy);
                   },
@@ -158,7 +162,10 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddPolicyDialog,
-        child: const Icon(Icons.add),
+        child: const Icon(
+          Iconsax.add5,
+          color: Color(0xFFF88232),
+        ),
       ),
     );
   }
@@ -166,9 +173,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
 
 class JustifiedText extends StatelessWidget {
   final String text;
-
-  JustifiedText(this.text);
-
+  const JustifiedText(this.text, {super.key});
   @override
   Widget build(BuildContext context) {
     return Container(
