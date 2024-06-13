@@ -21,12 +21,13 @@ class _EventManagePageState extends State<EventManagePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Event Manage',
-          style: GoogleFonts.arvo(fontSize: 24.0),
+          'Event Management',
+          style: GoogleFonts.arvo(fontSize: 24.0, color: Colors.black),
         ),
+        backgroundColor: const Color.fromARGB(255, 255, 234, 211),
         actions: [
           IconButton(
-            icon: const Icon(Iconsax.filter5,color:  Color(0xFFF88232)),
+            icon: const Icon(Iconsax.filter5, color: Color(0xFFF88232)),
             onPressed: () {
               _showFilterMenu(context);
             },
@@ -65,9 +66,13 @@ class _EventManagePageState extends State<EventManagePage> {
             itemBuilder: (context, index) {
               var event = events[index];
               return ListTile(
-                title: Text(event['title']),
+                title: Text(
+                  event['title'],
+                  style: GoogleFonts.anekDevanagari(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
                 subtitle: Text(
-                  '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']} \nLocation: ${event['restaurantName']}'
+                  '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']} \nLocation: ${event['restaurantName']}',
+                  style: GoogleFonts.roboto(fontSize: 14),
                 ),
                 trailing: IconButton(
                   icon: const Icon(FeatherIcons.xCircle, color: Color(0xFFF35000)),
@@ -105,7 +110,7 @@ class _EventManagePageState extends State<EventManagePage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  title: const Text('Sort Order'),
+                  title: const Text('Sort Order', style: TextStyle(fontWeight: FontWeight.bold)),
                   trailing: DropdownButton<bool>(
                     value: _isAscending,
                     onChanged: (value) {
@@ -128,7 +133,7 @@ class _EventManagePageState extends State<EventManagePage> {
                   ),
                 ),
                 ListTile(
-                  title: const Text('Filter by Date'),
+                  title: const Text('Filter by Date', style: TextStyle(fontWeight: FontWeight.bold)),
                   trailing: IconButton(
                     icon: const Icon(Icons.date_range),
                     onPressed: () async {
@@ -149,7 +154,7 @@ class _EventManagePageState extends State<EventManagePage> {
                   ),
                 ),
                 ListTile(
-                  title: const Text('Clear Filters'),
+                  title: const Text('Clear Filters', style: TextStyle(fontWeight: FontWeight.bold)),
                   trailing: IconButton(
                     icon: const Icon(Icons.clear),
                     onPressed: () {
@@ -174,17 +179,17 @@ class _EventManagePageState extends State<EventManagePage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('Revoke Event'),
+              title: const Text('Revoke Event', style: TextStyle(fontWeight: FontWeight.bold)),
               content: Text(message),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('Cancel'),
+                  child: const Text('Cancel', style: TextStyle(color: Color(0xFFF88232))),
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
                 ),
                 TextButton(
-                  child: const Text('Confirm'),
+                  child: const Text('Confirm', style: TextStyle(color: Color(0xFFF88232))),
                   onPressed: () {
                     Navigator.of(context).pop(true);
                   },
@@ -204,7 +209,7 @@ class _EventManagePageState extends State<EventManagePage> {
         return AlertDialog(
           title: Text(
             event['title'],
-            style: GoogleFonts.raleway(fontSize: 20, fontWeight: FontWeight.bold),
+            style: GoogleFonts.anekDevanagari(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: Container(
             width: 300, // Fixed width
@@ -222,12 +227,12 @@ class _EventManagePageState extends State<EventManagePage> {
                   const SizedBox(height: 8),
                   Text(
                     'Description:',
-                    style: GoogleFonts.raleway(fontWeight: FontWeight.bold),
+                    style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     event['description'],
-                    style: GoogleFonts.raleway(),
+                    style: GoogleFonts.anekDevanagari(),
                   ),
                   const SizedBox(height: 8),
                   Align(
@@ -242,7 +247,7 @@ class _EventManagePageState extends State<EventManagePage> {
                         } else {
                           return Text(
                             'by: ${snapshot.data ?? 'Unknown'}',
-                            style: GoogleFonts.raleway(fontWeight: FontWeight.bold),
+                            style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold),
                           );
                         }
                       },
@@ -254,7 +259,7 @@ class _EventManagePageState extends State<EventManagePage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Close'),
+              child: const Text('Close', style: TextStyle(color: Color(0xFFF88232))),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -287,12 +292,12 @@ class _EventManagePageState extends State<EventManagePage> {
         children: <Widget>[
           Text(
             '$label: ',
-            style: GoogleFonts.raleway(fontWeight: FontWeight.bold),
+            style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold),
           ),
           Expanded(
             child: Text(
               value,
-              style: GoogleFonts.raleway(),
+              style: GoogleFonts.anekDevanagari(),
             ),
           ),
         ],

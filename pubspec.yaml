@@ -44,6 +44,7 @@ dependencies:
   firebase_storage: ^11.7.7
   iconsax: ^0.0.8
   flutter_feather_icons: ^2.0.0+1
+  fl_chart: ^0.68.0
   
 
 dev_dependencies:

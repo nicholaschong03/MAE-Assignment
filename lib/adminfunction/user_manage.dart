@@ -34,7 +34,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Edit: ${userDoc['name']}'),
+              title: Text(
+                'Edit: ${userDoc['name']}',
+                style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   children: [
@@ -135,9 +138,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'User Manage',
-          style: GoogleFonts.arvo(fontSize: 24.0),
+          'User Management',
+          style: GoogleFonts.arvo(fontSize: 24.0, color: Colors.black),
         ),
+        backgroundColor: const Color.fromARGB(255, 255, 234, 211), 
       ),
       body: Column(
         children: [
@@ -148,11 +152,12 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Search by Username',
-                      border: OutlineInputBorder(
+                      labelStyle: GoogleFonts.roboto(color: const Color(0xFFF88232)),
+                      border: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(45))),
-                      prefixIcon: Icon(Icons.search_rounded),
+                      prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFF88232)),
                     ),
                     onChanged: (value) {
                       setState(() {
@@ -195,15 +200,16 @@ class _UserManagementPageState extends State<UserManagementPage> {
                       ),
                       title: Text(
                         user['username'],
-                        style: TextStyle(
+                        style: GoogleFonts.roboto(
                           color: isSuspended ? Colors.red : Colors.black,
-                          fontWeight: isSuspended ? FontWeight.bold : null,
+                          fontWeight: isSuspended ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                       subtitle: Text(
-                          'Email: ${user['email']}\nRole: ${_getRoleDisplayName(user['role'])}'),
+                          'Email: ${user['email']}\nRole: ${_getRoleDisplayName(user['role'])}',
+                          style: GoogleFonts.roboto(color: Colors.black)),
                       trailing: IconButton(
-                        icon: const Icon(Icons.more_vert),
+                        icon: const Icon(Icons.more_vert, color: Color(0xFFF88232)),
                         onPressed: () {
                           _showUserManagementDialog(context, user.id);
                         },
@@ -243,7 +249,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Filter Users'),
+          title: Text('Filter Users', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold)),
           content: SizedBox(
             width: double.maxFinite,
             child: Column(
@@ -251,7 +257,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
               children: [
                 DropdownButtonFormField<String>(
                   value: _selectedRole,
-                  decoration: const InputDecoration(labelText: 'User Role'),
+                  decoration: InputDecoration(
+                    labelText: 'User Role',
+                    labelStyle: GoogleFonts.roboto(color: const Color(0xFFF88232)),
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'All', child: Text('All')),
                     DropdownMenuItem(value: 'Content Creator', child: Text('Content Creator')),
@@ -265,7 +274,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 ),
                 DropdownButtonFormField<String>(
                   value: _selectedStatus,
-                  decoration: const InputDecoration(labelText: 'Account Status'),
+                  decoration: InputDecoration(
+                    labelText: 'Account Status',
+                    labelStyle: GoogleFonts.roboto(color: const Color(0xFFF88232)),
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'All', child: Text('All')),
                     DropdownMenuItem(value: 'Active', child: Text('Active')),
@@ -279,7 +291,10 @@ class _UserManagementPageState extends State<UserManagementPage> {
                 ),
                 DropdownButtonFormField<bool>(
                   value: _sortAscending,
-                  decoration: const InputDecoration(labelText: 'Signup Date'),
+                  decoration: InputDecoration(
+                    labelText: 'Signup Date',
+                    labelStyle: GoogleFonts.roboto(color: const Color(0xFFF88232)),
+                  ),
                   items: const [
                     DropdownMenuItem(value: false, child: Text('Descending')),
                     DropdownMenuItem(value: true, child: Text('Ascending')),
