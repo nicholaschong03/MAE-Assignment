@@ -1,8 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:jom_eat_project/Loginpage/login.dart';
-import 'adminpage GUI/admin_main.dart';
-import 'ccpage GUI/cc_main.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: LoginPage()
+      home: LoginPage(), // Display Login Page
     );
   }
 }
