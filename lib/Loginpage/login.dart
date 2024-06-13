@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage GUI/admin_main.dart';
+import '../ccpage GUI/cc_main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -74,10 +75,10 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => AdminPage()),
       );
     } else if (userRole == 'cc') {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => ContentCreatorPage()),
-      // );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ContentCreatorPage()),
+       );
     } else {
       // Handle unknown user role
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
