@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:jom_eat_project/adminfunction/feedback_service.dart';
 
@@ -122,7 +122,11 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:
+          const Color.fromARGB(255, 255, 234, 211), // Set background color
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(
+            255, 255, 234, 211), // Set app bar background color
         title: Row(
           children: [
             Expanded(
@@ -133,13 +137,13 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
                         ? 'Filtered by Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}'
                         : 'All Feedbacks',
                 style: GoogleFonts.dosis(
-                    color: const Color(0xFFF88232),
-                    fontSize: 21.0,
+                    color: const Color(0xFFF35000),
+                    fontSize: 22.0,
                     fontWeight: FontWeight.w600),
               ),
             ),
             IconButton(
-              icon: const Icon(FeatherIcons.filter,color:  Color(0xFFF88232)),
+              icon: const Icon(Iconsax.filter5, color: Color(0xFFF35000)),
               onPressed: _showFilterDialog,
             ),
           ],
@@ -149,7 +153,8 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _feedbackService.getFeedbackStream(_selectedDate, _selectedTitle),
+              stream: _feedbackService.getFeedbackStream(
+                  _selectedDate, _selectedTitle),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -163,9 +168,16 @@ class _FeedbackPanelState extends State<FeedbackPanel> {
                   itemBuilder: (context, index) {
                     var feedback = feedbacks[index];
                     return ListTile(
-                      title: Text(feedback['feedback']),
+                      title: Text(
+                        feedback['feedback'],
+                        style: GoogleFonts.raleway(fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.justify,
+                      ),
                       subtitle: Text(
-                          'Date: ${DateFormat('yyyy-MM-dd').format((feedback['createDate'] as Timestamp).toDate())}'),
+                        'Date: ${DateFormat('yyyy-MM-dd').format((feedback['createDate'] as Timestamp).toDate())}',
+                        style: GoogleFonts.raleway(),
+                        textAlign: TextAlign.justify,
+                      ),
                     );
                   },
                 );

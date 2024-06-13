@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:jom_eat_project/common%20function/notification.dart';
 import 'package:jom_eat_project/common%20function/user_services.dart';
 
@@ -15,6 +16,9 @@ class UserManagementPage extends StatefulWidget {
 class _UserManagementPageState extends State<UserManagementPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _selectedRole = 'All';
+  String _selectedStatus = 'All';
+  bool _sortAscending = false; // false for descending, true for ascending
   final NotificationService _notificationService = NotificationService(); // Instantiate NotificationService
 
   Future<void> _showUserManagementDialog(BuildContext context, String userId) async {
@@ -139,29 +143,36 @@ class _UserManagementPageState extends State<UserManagementPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                labelText: 'Search by Username',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(45))),
-                prefixIcon: Icon(Icons.search_rounded),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
-              },
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: const InputDecoration(
+                      labelText: 'Search by Username',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(45))),
+                      prefixIcon: Icon(Icons.search_rounded),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.toLowerCase();
+                      });
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Iconsax.filter5, color: Color(0xFFF88232)),
+                  onPressed: () {
+                    _showFilterDialog(context);
+                  },
+                ),
+              ],
             ),
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .where('role', isNotEqualTo: 'admin') // Ensure only non-admin users are shown
-                  .orderBy('signedUpAt', descending: true) // Order by signup date
-                  .orderBy('role')
-                  .snapshots(),
+              stream: _getFilteredUsersStream(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -205,6 +216,104 @@ class _UserManagementPageState extends State<UserManagementPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Stream<QuerySnapshot> _getFilteredUsersStream() {
+    Query<Map<String, dynamic>> collectionRef = FirebaseFirestore.instance.collection('users').where('role', whereIn: ['cc', 'foodie']);
+    
+    // Apply role filter
+    if (_selectedRole != 'All') {
+      collectionRef = collectionRef.where('role', isEqualTo: _selectedRole == 'Content Creator' ? 'cc' : 'foodie');
+    }
+
+    // Apply status filter
+    if (_selectedStatus != 'All') {
+      collectionRef = collectionRef.where('isSuspended', isEqualTo: _selectedStatus == 'Suspended');
+    }
+
+    // Sort by signup date
+    collectionRef = collectionRef.orderBy('signedUpAt', descending: !_sortAscending);
+
+    return collectionRef.snapshots();
+  }
+
+  Future<void> _showFilterDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Filter Users'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: _selectedRole,
+                  decoration: const InputDecoration(labelText: 'User Role'),
+                  items: const [
+                    DropdownMenuItem(value: 'All', child: Text('All')),
+                    DropdownMenuItem(value: 'Content Creator', child: Text('Content Creator')),
+                    DropdownMenuItem(value: 'Foodie', child: Text('Foodie')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedRole = value!;
+                    });
+                  },
+                ),
+                DropdownButtonFormField<String>(
+                  value: _selectedStatus,
+                  decoration: const InputDecoration(labelText: 'Account Status'),
+                  items: const [
+                    DropdownMenuItem(value: 'All', child: Text('All')),
+                    DropdownMenuItem(value: 'Active', child: Text('Active')),
+                    DropdownMenuItem(value: 'Suspended', child: Text('Suspended')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedStatus = value!;
+                    });
+                  },
+                ),
+                DropdownButtonFormField<bool>(
+                  value: _sortAscending,
+                  decoration: const InputDecoration(labelText: 'Signup Date'),
+                  items: const [
+                    DropdownMenuItem(value: false, child: Text('Descending')),
+                    DropdownMenuItem(value: true, child: Text('Ascending')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _sortAscending = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Clear'),
+              onPressed: () {
+                setState(() {
+                  _selectedRole = 'All';
+                  _selectedStatus = 'All';
+                  _sortAscending = false;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Apply'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

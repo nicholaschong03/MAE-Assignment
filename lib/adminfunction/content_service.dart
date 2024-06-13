@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:jom_eat_project/common%20function/notification.dart';
 
 class ContentService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -21,7 +22,23 @@ class ContentService {
   }
 
   Future<void> deleteContent(String contentId) async {
-    await _firestore.collection('contents').doc(contentId).delete();
+    // Fetch the content details before deleting
+    var contentDoc = await _firestore.collection('contents').doc(contentId).get();
+    if (contentDoc.exists) {
+      var content = Content.fromMap(contentDoc.data()!, contentId);
+
+      // Delete the content
+      await _firestore.collection('contents').doc(contentId).delete();
+
+      // Send notification to the user
+      final NotificationService notificationService = NotificationService();
+      await notificationService.sendNotification(
+        'Post Deleted',
+        'Your post titled "${content.title}" has been deleted by the admin.',
+        'admin', // assuming 'admin' as the sender
+        to: content.userId, // sending to the user
+      );
+    }
   }
 }
 

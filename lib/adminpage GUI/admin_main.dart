@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:jom_eat_project/adminfunction/event_manage.dart';
+import 'package:jom_eat_project/adminfunction/user_manage.dart';
 import '../common function/notification.dart';
 import 'home.dart';
 import 'profile.dart';
@@ -46,16 +49,31 @@ class _AdminPageState extends State<AdminPage> {
     });
   }
 
+  void _navigateToUserManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => UserManagementPage()),
+    );
+  }
+
+  void _navigateToEventManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const EventManagePage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 255, 234, 211),
         actions: [
           IconButton(
             icon: Icon(
               _hasUnreadNotifications
-                  ? Icons.notifications_active_rounded
-                  : Icons.notifications_rounded,
+                  ? Iconsax.notification_bing5
+                  : Iconsax.notification5,
               color: _hasUnreadNotifications
                   ? const Color(0xFFF88232)
                   : Colors.grey,
@@ -70,10 +88,27 @@ class _AdminPageState extends State<AdminPage> {
               ).then((value) => _checkForUnreadNotifications()); // Recheck for unread notifications when returning
             },
           ),
+          IconButton(
+            icon: const Icon(Iconsax.user_edit4),
+            onPressed: _navigateToUserManagement,
+            color: const Color(0xFFF88232),
+          ),
+          IconButton(
+            icon: const Icon(Iconsax.menu_board5),
+            onPressed: _navigateToEventManagement,
+            color: const Color(0xFFF88232),
+          ),
         ],
-        title: Text(
-          'Jom Eat',
-          style: GoogleFonts.bungeeSpice(fontSize: 24.0, letterSpacing: 1.0),
+        title: TextButton(
+          onPressed: () {
+            setState(() {
+              _checkForUnreadNotifications();
+            });
+          },
+          child: Text(
+            'Jom Eat',
+            style: GoogleFonts.bungeeSpice(fontSize: 24.0, letterSpacing: 1.0),
+          ),
         ),
         leading: Image.asset('assets/images/logo.png'),
       ),
@@ -82,7 +117,7 @@ class _AdminPageState extends State<AdminPage> {
         children: <Widget>[
           HomePanel(),
           const FeedbackPanel(),
-          ReportsPanel(),
+          const ReportsPanel(),
           ProfilePanel(),
         ],
       ),
@@ -90,28 +125,29 @@ class _AdminPageState extends State<AdminPage> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: 'Home',
+        icon: Icon(Iconsax.home),
+        label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.feedback_rounded),
-            label: 'Feedbacks',
+        icon: Icon(Iconsax.notification_status),
+        label: 'Feedbacks',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_rounded),
-            label: 'Reports',
+        icon: Icon(Iconsax.health),
+        label: 'Reports',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_rounded),
-            label: 'Profile',
+        icon: Icon(Iconsax.user),
+        label: 'Profile',
           ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: const Color(0xFFF88232),
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: Color.fromARGB(190, 49, 49, 49),
         selectedLabelStyle: GoogleFonts.lato(fontSize: 12, fontWeight: FontWeight.bold),
         unselectedLabelStyle: GoogleFonts.lato(fontSize: 12),
         onTap: _onItemTapped,
+        backgroundColor: Color.fromARGB(255, 255, 234, 211),
       ),
     );
   }

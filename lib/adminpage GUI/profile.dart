@@ -319,7 +319,8 @@ class _ProfilePanelState extends State<ProfilePanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      color: const Color.fromARGB(255, 255, 234, 211), // Background color
       padding: const EdgeInsets.all(25.0),
       child: FutureBuilder<Map<String, dynamic>>(
         future: _userDataFuture,
@@ -337,172 +338,177 @@ class _ProfilePanelState extends State<ProfilePanel> {
             var userData = snapshot.data!;
             var profileImageUrl =
                 userData['profileImage'] ?? 'https://via.placeholder.com/150';
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+            return Column(
+              children: [
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          _showImageOptions(context, profileImageUrl);
-                        },
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundImage: profileImageUrl.startsWith('http')
-                              ? NetworkImage(profileImageUrl)
-                              : AssetImage(profileImageUrl) as ImageProvider,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              userData['username'] ?? 'No username',
-                              style: GoogleFonts.georama(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              _showImageOptions(context, profileImageUrl);
+                            },
+                            child: CircleAvatar(
+                              radius: 50,
+                              backgroundImage: profileImageUrl.startsWith('http')
+                                  ? NetworkImage(profileImageUrl)
+                                  : AssetImage(profileImageUrl) as ImageProvider,
                             ),
-                            TextButton(
-                              onPressed: () {
-                                _showEditProfileDialog(userData);
-                              },
-                              child: const Text(
-                                'Edit Profile',
-                                style: TextStyle(color: Color(0xFFF88232)),
-                              ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  userData['username'] ?? 'No username',
+                                  style: GoogleFonts.georama(
+                                    fontSize: 30, // Larger font size
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    _showEditProfileDialog(userData);
+                                  },
+                                  child: const Text(
+                                    'Edit Profile',
+                                    style: TextStyle(color: Color(0xFFF88232)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildProfileDetail('Name', userData['name'] ?? 'No name'),
+                            _buildProfileDetail('Email', userData['email'] ?? 'No email'),
+                            _buildProfileDetail('Role', userData['role'] ?? 'No role'),
+                            _buildProfileDetail('Gender', userData['gender'] ?? 'Not specified'),
+                            _buildProfileDetail('Phone(+60)', userData['phone'] ?? 'No phone'),
+                            _buildProfileDetail(
+                              'Joined',
+                              userData['signedUpAt'] != null
+                                  ? DateFormat('yyyy-MM-dd HH:mm:ss').format(userData['signedUpAt'].toDate())
+                                  : 'No join date',
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildProfileDetail('Name', userData['name'] ?? 'No name'),
-                        _buildProfileDetail('Email', userData['email'] ?? 'No email'),
-                        _buildProfileDetail('Role', userData['role'] ?? 'No role'),
-                        _buildProfileDetail('Gender', userData['gender'] ?? 'Not specified'),
-                        _buildProfileDetail('Phone(+60)', userData['phone'] ?? 'No phone'),
-                        _buildProfileDetail(
-                          'Joined',
-                          userData['signedUpAt'] != null
-                              ? DateFormat('yyyy-MM-dd HH:mm:ss').format(userData['signedUpAt'].toDate())
-                              : 'No join date',
-                        ),
-                      ],
-                    ),
+                ),
+                const Spacer(), // Push the buttons to the bottom
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => UpdatePolicyPage(userId: widget.currentUser),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'Platform Policy',
+                              style: GoogleFonts.georama(
+                                  color: const Color(0xFFF88232),
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              FirebaseAuth.instance
+                                  .sendPasswordResetEmail(
+                                email: FirebaseAuth.instance.currentUser!.email!,
+                              )
+                                  .then((_) {
+                                _showSnackBar('Password reset email sent successfully!');
+                              }).catchError((error) {
+                                _showSnackBar('Failed to send password reset email!');
+                              });
+                            },
+                            child: Text(
+                              'Reset Password',
+                              style: GoogleFonts.georama(
+                                  color: const Color(0xFFF88232),
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Logout'),
+                                    content: const Text('Are you sure you want to logout?'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          FirebaseAuth.instance.signOut().then((_) {
+                                            Navigator.of(context).pushReplacement(
+                                              MaterialPageRoute(
+                                                builder: (context) => const LoginPage(),
+                                              ),
+                                            );
+                                          });
+                                        },
+                                        child: const Text('Yes'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('No'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Text(
+                              'Logout',
+                              style: GoogleFonts.georama(
+                                  color: const Color(0xFFF88232),
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => UpdatePolicyPage(userId: widget.currentUser),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                'Platform Policy',
-                                style: GoogleFonts.georama(
-                                    color: const Color(0xFFF88232),
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                FirebaseAuth.instance
-                                    .sendPasswordResetEmail(
-                                  email: FirebaseAuth.instance.currentUser!.email!,
-                                )
-                                    .then((_) {
-                                  _showSnackBar('Password reset email sent successfully!');
-                                }).catchError((error) {
-                                  _showSnackBar('Failed to send password reset email!');
-                                });
-                              },
-                              child: Text(
-                                'Reset Password',
-                                style: GoogleFonts.georama(
-                                    color: const Color(0xFFF88232),
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Logout'),
-                                      content: const Text('Are you sure you want to logout?'),
-                                      actions: <Widget>[
-                                        TextButton(
-                                          onPressed: () {
-                                            FirebaseAuth.instance.signOut().then((_) {
-                                              Navigator.of(context).pushReplacement(
-                                                MaterialPageRoute(
-                                                  builder: (context) => const LoginPage(),
-                                                ),
-                                              );
-                                            });
-                                          },
-                                          child: const Text('Yes'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text('No'),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                              child: Text(
-                                'Logout',
-                                style: GoogleFonts.georama(
-                                    color: const Color(0xFFF88232),
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             );
           } else {
-            return const Center(child: Text('No user data found'));
+            return const Center(child: Text('No user data found', style: TextStyle(color: Colors.black)));
           }
         },
       ),
@@ -514,7 +520,7 @@ class _ProfilePanelState extends State<ProfilePanel> {
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Text(
         '$label: $value',
-        style: const TextStyle(fontSize: 16),
+        style: GoogleFonts.georama(fontSize: 20), // Larger font size and using GoogleFonts
       ),
     );
   }

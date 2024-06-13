@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:jom_eat_project/Loginpage/login.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/common%20function/verification.dart';
-import 'package:jom_eat_project/common%20function/user_services.dart'; // Import the updated UserData class
+import 'package:jom_eat_project/common%20function/user_services.dart';
+import 'package:jom_eat_project/common%20function/notification.dart'; // Import the NotificationService
 
 class SignUpPage extends StatefulWidget {
   @override
@@ -50,6 +51,15 @@ class _SignUpPageState extends State<SignUpPage> {
         name: _nameController.text,
         username: _usernameController.text,
         role: _selectedRole!,
+      );
+
+      // Send notification to admin
+      final NotificationService notificationService = NotificationService();
+      await notificationService.sendNotification(
+        'New User Signup',
+        'A new user has signed up as ${_selectedRole == 'cc' ? 'Content Creator' : 'Foodie'}.',
+        'system', // or any identifier for the system
+        role: 'admin', // targeting admin role
       );
 
       ScaffoldMessenger.of(context).showSnackBar(

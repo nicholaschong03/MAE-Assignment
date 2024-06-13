@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 
 class EventManagePage extends StatefulWidget {
@@ -25,7 +26,7 @@ class _EventManagePageState extends State<EventManagePage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const Icon(Iconsax.filter5,color:  Color(0xFFF88232)),
             onPressed: () {
               _showFilterMenu(context);
             },
