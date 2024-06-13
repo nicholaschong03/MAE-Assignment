@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage GUI/admin_main.dart';
+import '../ccpage GUI/cc_main.dart';
+import '../common function/user_services.dart'; // Import UserService
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -33,14 +34,11 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loginUser() async {
     try {
-      // Sign in with Firebase Authentication
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
-      // Check if email is verified
       if (userCredential.user?.emailVerified ?? false) {
         _redirectToPageBasedOnRole(userCredential.user?.uid);
       } else {
@@ -59,29 +57,36 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _redirectToPageBasedOnRole(String? userId) async {
     if (userId == null) return;
 
-    DocumentSnapshot userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    String userRole = userDoc.get('role');
+    try {
+      Map<String, dynamic> userData = await UserData(userId: userId).getUserData();
+      String userRole = userData['role'];
+      bool isSuspended = userData['isSuspended'];
 
-    if (userRole == 'foodie') {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => FoodiePage()),
-      // );
-    } else if (userRole == 'admin') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => AdminPage()),
-      );
-    } else if (userRole == 'cc') {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => ContentCreatorPage()),
-      // );
-    } else {
-      // Handle unknown user role
+
+      if (userRole == 'foodie' && !isSuspended) {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => FoodiePage(userId: userId, role: userRole)),
+        // );
+      } else if (userRole == 'admin' && !isSuspended) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => AdminPage(userId: userId, role: userRole)),
+        );
+      } else if (userRole == 'cc' && !isSuspended) {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
+        // );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Unknown User or Suspended User'),
+        ));
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Unknown User'),
+        content: Text('Failed to retrieve user data.'),
       ));
     }
   }
@@ -91,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color: Color(0xFFF9E4BC),
+          color:Color.fromARGB(255, 255, 234, 211),
         ),
         padding: const EdgeInsets.all(30.0),
         child: Center(
@@ -112,11 +117,12 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    errorText: _isEmailValid ? null : 'Please enter a valid email',
+                    errorText:
+                        _isEmailValid ? null : 'Please enter a valid email',
                     border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
-                    fillColor: Color.fromARGB(255, 255, 255, 255),
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
                     filled: true,
                   ),
                 ),
@@ -126,11 +132,13 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    errorText: _isPasswordValid ? null : 'Please enter a valid password',
+                    errorText: _isPasswordValid
+                        ? null
+                        : 'Please enter a valid password',
                     border: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
-                    fillColor: Color.fromARGB(255, 255, 255, 255),
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
                     filled: true,
                   ),
                   obscureText: true,
@@ -149,18 +157,25 @@ class _LoginPageState extends State<LoginPage> {
                               builder: (context) => ForgetPasswordPage()),
                         );
                       },
-                      child: const Text('Forget Password',
-                          style: TextStyle(color: Color(0xFFF35000))),
+                      child: Text(
+                        'Forget Password',
+                        style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500),
+                      ),
                     ),
                     // Login Button
                     ElevatedButton(
                       onPressed: _validateInputs,
-                      child: Text('Login',
-                          style: GoogleFonts.poppins(
-                            color: const Color(0xFFF35000),
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
-                          ),),
+                      child: Text(
+                        'Login',
+                        style: GoogleFonts.georama(
+                          color: const Color(0xFFF35000),
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -174,8 +189,13 @@ class _LoginPageState extends State<LoginPage> {
                           MaterialPageRoute(builder: (context) => SignUpPage()),
                         );
                       },
-                      child: const Text('First time here? Sign up now',
-                          style: TextStyle(color: Color(0xFFF35000))),
+                      child: Text(
+                        'First time here? Sign up now',
+                        style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500),
+                      ),
                     ),
                   ],
                 ),

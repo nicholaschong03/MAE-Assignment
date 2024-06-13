@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:jom_eat_project/verification.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:jom_eat_project/common%20function/notification.dart';
+import 'package:jom_eat_project/common%20function/user_services.dart';
 
 class UserManagementPage extends StatefulWidget {
-  const UserManagementPage({super.key});
+  late final String currentUser = UserData.getCurrentUserID();
+  UserManagementPage({super.key});
 
   @override
   _UserManagementPageState createState() => _UserManagementPageState();
@@ -13,20 +16,17 @@ class UserManagementPage extends StatefulWidget {
 class _UserManagementPageState extends State<UserManagementPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _selectedRole = 'All';
+  String _selectedStatus = 'All';
+  bool _sortAscending = false; // false for descending, true for ascending
+  final NotificationService _notificationService = NotificationService(); // Instantiate NotificationService
 
-  Future<void> _showUserManagementDialog(
-      BuildContext context, DocumentSnapshot userData) async {
-    TextEditingController nameController =
-        TextEditingController(text: userData['name']);
-    TextEditingController roleController =
-        TextEditingController(text: userData['role']);
-    TextEditingController phoneController =
-        TextEditingController(text: userData['phone']);
-    TextEditingController usernameController =
-        TextEditingController(text: userData['username']);
+  Future<void> _showUserManagementDialog(BuildContext context, String userId) async {
+    UserData userData = UserData(userId: userId);
+    Map<String, dynamic> userDoc = await userData.getUserData();
 
-    bool isSuspended = userData['isSuspended'] ?? false;
-    bool _isPhoneValid = true;
+    TextEditingController roleController = TextEditingController(text: userDoc['role']);
+    bool isSuspended = userDoc['isSuspended'] ?? false;
 
     await showDialog<void>(
       context: context,
@@ -34,16 +34,15 @@ class _UserManagementPageState extends State<UserManagementPage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Edit: ${userData['name']}'),
+              title: Text(
+                'Edit: ${userDoc['name']}',
+                style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Name'),
-                    ),
                     DropdownButtonFormField<String>(
-                      value: userData['role'],
+                      value: userDoc['role'],
                       items: const [
                         DropdownMenuItem<String>(
                           value: 'cc',
@@ -59,57 +58,52 @@ class _UserManagementPageState extends State<UserManagementPage> {
                       },
                       decoration: const InputDecoration(labelText: 'Role'),
                     ),
-                    TextField(
-                      controller: phoneController,
-                      decoration: InputDecoration(
-                        labelText: 'Phone (+60)',
-                        errorText: _isPhoneValid ? null : 'Please enter a valid phone number',
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _isPhoneValid = verifyPhoneNumber(value);
-                        });
-                      },
-                    ),
-                    TextField(
-                      controller: usernameController,
-                      decoration: const InputDecoration(labelText: 'Username'),
-                    ),
                   ],
                 ),
               ),
               actions: <Widget>[
                 TextButton(
                   child: Text(isSuspended ? 'Reinstate' : 'Suspend'),
-                  onPressed: () {
-                    FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userData.id)
-                        .update({
-                      'isSuspended': !isSuspended,
-                    });
-                    Navigator.of(context).pop();
+                  onPressed: () async {
+                    try {
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .update({
+                        'isSuspended': !isSuspended,
+                      });
+                      if (!isSuspended) {
+                        // Send notification if the user is being reinstated
+                        await _notificationService.sendNotification(
+                          'Account Reinstated',
+                          'Your account has been reinstated.',
+                          widget.currentUser,
+                          to: userId,
+                          role: userDoc['role'], // Send to the user's role
+                        );
+                      }
+                      Navigator.of(context).pop();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to update status: $e')),
+                      );
+                    }
                   },
                 ),
                 TextButton(
                   child: const Text('Update'),
-                  onPressed: () {
-                    if (_isPhoneValid) {
-                      FirebaseFirestore.instance
+                  onPressed: () async {
+                    try {
+                      await FirebaseFirestore.instance
                           .collection('users')
-                          .doc(userData.id)
+                          .doc(userId)
                           .update({
-                        'name': nameController.text,
                         'role': roleController.text,
-                        'phone': phoneController.text,
-                        'username': usernameController.text,
                       });
                       Navigator.of(context).pop();
-                    } else {
+                    } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please enter a valid phone number.'),
-                        ),
+                        SnackBar(content: Text('Failed to update role: $e')),
                       );
                     }
                   },
@@ -144,44 +138,53 @@ class _UserManagementPageState extends State<UserManagementPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'User Management Page',
-          style: GoogleFonts.arvo(fontSize: 24.0, letterSpacing: 0.5),
+          'User Management',
+          style: GoogleFonts.arvo(fontSize: 24.0, color: Colors.black),
         ),
+        backgroundColor: const Color.fromARGB(255, 255, 234, 211), 
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                labelText: 'Search by Username',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.search),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
-              },
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Search by Username',
+                      labelStyle: GoogleFonts.roboto(color: const Color(0xFFF88232)),
+                      border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(45))),
+                      prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFF88232)),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.toLowerCase();
+                      });
+                    },
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Iconsax.filter5, color: Color(0xFFF88232)),
+                  onPressed: () {
+                    _showFilterDialog(context);
+                  },
+                ),
+              ],
             ),
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .where('role', isNotEqualTo: 'admin') // Ensure only non-admin users are shown
-                  .orderBy('signedUpAt', descending: true) // Order by signup date
-                  .orderBy('role')
-                  .snapshots(),
+              stream: _getFilteredUsersStream(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 var userData = snapshot.data!.docs;
                 var filteredUsers = userData.where((user) {
-                  var username =
-                      user['username']?.toString().toLowerCase() ?? '';
+                  var username = user['username']?.toString().toLowerCase() ?? '';
                   return username.contains(_searchQuery);
                 }).toList();
 
@@ -189,8 +192,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
                   itemCount: filteredUsers.length,
                   itemBuilder: (context, index) {
                     var user = filteredUsers[index];
-                    var profileImageUrl = user['profileImage'] ??
-                        'https://via.placeholder.com/150';
+                    var profileImageUrl = user['profileImage'] ?? 'https://via.placeholder.com/200';
                     var isSuspended = user['isSuspended'] ?? false;
                     return ListTile(
                       leading: CircleAvatar(
@@ -198,17 +200,18 @@ class _UserManagementPageState extends State<UserManagementPage> {
                       ),
                       title: Text(
                         user['username'],
-                        style: TextStyle(
+                        style: GoogleFonts.roboto(
                           color: isSuspended ? Colors.red : Colors.black,
-                          fontWeight: isSuspended ? FontWeight.bold : null,
+                          fontWeight: isSuspended ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
                       subtitle: Text(
-                          'Email: ${user['email']}\nRole: ${_getRoleDisplayName(user['role'])}'),
+                          'Email: ${user['email']}\nRole: ${_getRoleDisplayName(user['role'])}',
+                          style: GoogleFonts.roboto(color: Colors.black)),
                       trailing: IconButton(
-                        icon: const Icon(Icons.more_vert),
+                        icon: const Icon(Icons.more_vert, color: Color(0xFFF88232)),
                         onPressed: () {
-                          _showUserManagementDialog(context, user);
+                          _showUserManagementDialog(context, user.id);
                         },
                       ),
                     );
@@ -219,6 +222,113 @@ class _UserManagementPageState extends State<UserManagementPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Stream<QuerySnapshot> _getFilteredUsersStream() {
+    Query<Map<String, dynamic>> collectionRef = FirebaseFirestore.instance.collection('users').where('role', whereIn: ['cc', 'foodie']);
+    
+    // Apply role filter
+    if (_selectedRole != 'All') {
+      collectionRef = collectionRef.where('role', isEqualTo: _selectedRole == 'Content Creator' ? 'cc' : 'foodie');
+    }
+
+    // Apply status filter
+    if (_selectedStatus != 'All') {
+      collectionRef = collectionRef.where('isSuspended', isEqualTo: _selectedStatus == 'Suspended');
+    }
+
+    // Sort by signup date
+    collectionRef = collectionRef.orderBy('signedUpAt', descending: !_sortAscending);
+
+    return collectionRef.snapshots();
+  }
+
+  Future<void> _showFilterDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Filter Users', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold)),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: _selectedRole,
+                  decoration: InputDecoration(
+                    labelText: 'User Role',
+                    labelStyle: GoogleFonts.roboto(color: const Color(0xFFF88232)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'All', child: Text('All')),
+                    DropdownMenuItem(value: 'Content Creator', child: Text('Content Creator')),
+                    DropdownMenuItem(value: 'Foodie', child: Text('Foodie')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedRole = value!;
+                    });
+                  },
+                ),
+                DropdownButtonFormField<String>(
+                  value: _selectedStatus,
+                  decoration: InputDecoration(
+                    labelText: 'Account Status',
+                    labelStyle: GoogleFonts.roboto(color: const Color(0xFFF88232)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'All', child: Text('All')),
+                    DropdownMenuItem(value: 'Active', child: Text('Active')),
+                    DropdownMenuItem(value: 'Suspended', child: Text('Suspended')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedStatus = value!;
+                    });
+                  },
+                ),
+                DropdownButtonFormField<bool>(
+                  value: _sortAscending,
+                  decoration: InputDecoration(
+                    labelText: 'Signup Date',
+                    labelStyle: GoogleFonts.roboto(color: const Color(0xFFF88232)),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: false, child: Text('Descending')),
+                    DropdownMenuItem(value: true, child: Text('Ascending')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _sortAscending = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Clear'),
+              onPressed: () {
+                setState(() {
+                  _selectedRole = 'All';
+                  _selectedStatus = 'All';
+                  _sortAscending = false;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Apply'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
