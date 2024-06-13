@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage GUI/admin_main.dart';
+import '../ccpage GUI/cc_main.dart';
 import '../common function/user_services.dart'; // Import UserService
 
 class LoginPage extends StatefulWidget {
@@ -60,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
       Map<String, dynamic> userData = await UserData(userId: userId).getUserData();
       String userRole = userData['role'];
       bool isSuspended = userData['isSuspended'];
+
 
       if (userRole == 'foodie' && !isSuspended) {
         // Navigator.pushReplacement(
