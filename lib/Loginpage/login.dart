@@ -3,12 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
-import '../adminpage/adminpage.dart';
 import 'package:jom_eat_project/foodie/screens/foodie_home_screen.dart';
 import '../adminpage GUI/admin_main.dart';
 import '../ccpage GUI/cc_main.dart';
 import '../adminfunction/policy.dart';
-import '../common function/user_services.dart'; 
+import '../common function/user_services.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -73,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
       if (userRole == 'foodie' && !isSuspended) {
         Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => FoodieHomeScreen(userId: userId, role: userRole)),
+        MaterialPageRoute(builder: (context) => FoodieHomeScreen(userId: userId)),
         );
       } else if (userRole == 'admin' && !isSuspended) {
         Navigator.pushReplacement(
