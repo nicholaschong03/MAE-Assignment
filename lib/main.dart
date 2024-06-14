@@ -24,7 +24,8 @@ class MyApp extends StatelessWidget {
       // home: FoodieHomeScreen(userId: 'AZwrBrL0xBcNKOkdqdDBvBMWRyJ3',), // Display Login Page
       // home: OutingProfileScreen(outingId: 'UYjyFsOxnhbucHWSmRU7', userId: 'rZrqSqsQBccEoMWKmLjf',), // Display Login Page
       //  home: CreateOutingScreen(), // Display Login Page
-      home: MainScreen(userId: 'AZwrBrL0xBcNKOkdqdDBvBMWRyJ3',),
+      // home: MainScreen(userId: 'AZwrBrL0xBcNKOkdqdDBvBMWRyJ3',),
+      home: LoginPage(),
     );
   }
 }
