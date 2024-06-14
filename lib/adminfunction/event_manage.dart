@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class EventManagePage extends StatefulWidget {
   const EventManagePage({super.key});
@@ -65,32 +67,55 @@ class _EventManagePageState extends State<EventManagePage> {
             itemCount: events.length,
             itemBuilder: (context, index) {
               var event = events[index];
-              return ListTile(
-                title: Text(
-                  event['title'],
-                  style: GoogleFonts.anekDevanagari(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']} \nLocation: ${event['restaurantName']}',
-                  style: GoogleFonts.roboto(fontSize: 14),
-                ),
-                trailing: IconButton(
-                  icon: const Icon(FeatherIcons.xCircle, color: Color(0xFFF35000)),
-                  onPressed: () async {
-                    bool confirm = await _showConfirmationDialog(context, 'Are you sure you want to revoke this event?');
-                    if (confirm) {
-                      try {
-                        await FirebaseFirestore.instance.collection('outingGroups').doc(event.id).delete();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Event revoked successfully!')));
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to revoke event: $e')));
-                      }
-                    }
-                  },
-                ),
-                onTap: () {
-                  _showEventDetailsDialog(context, event);
+              return FutureBuilder<Map<String, String>>(
+                future: _getRestaurantDataFromId(event['restaurantId']),
+                builder: (context, restaurantSnapshot) {
+                  if (restaurantSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (restaurantSnapshot.hasError) {
+                    return ListTile(
+                      title: Text('Error loading restaurant data', style: GoogleFonts.anekDevanagari(fontSize: 18, fontWeight: FontWeight.w600)),
+                      subtitle: Text(
+                        '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']}',
+                        style: GoogleFonts.roboto(fontSize: 14),
+                      ),
+                    );
+                  } else {
+                    var restaurantData = restaurantSnapshot.data!;
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: restaurantData['logo']!.startsWith('data:image/')
+                          ? MemoryImage(base64Decode(restaurantData['logo']!.split(',')[1]))
+                          : NetworkImage(restaurantData['logo']!) as ImageProvider,
+                      ),
+                      title: Text(
+                        event['title'],
+                        style: GoogleFonts.anekDevanagari(fontSize: 18, fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']} \nLocation: ${restaurantData['name']}',
+                        style: GoogleFonts.roboto(fontSize: 14),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(FeatherIcons.xCircle, color: Color(0xFFF35000)),
+                        onPressed: () async {
+                          bool confirm = await _showConfirmationDialog(context, 'Are you sure you want to revoke this event?');
+                          if (confirm) {
+                            try {
+                              await FirebaseFirestore.instance.collection('outingGroups').doc(event.id).delete();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Event revoked successfully!')));
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to revoke event: $e')));
+                            }
+                          }
+                        },
+                      ),
+                      onTap: () {
+                        _showEventDetailsDialog(context, event);
+                      },
+                    );
+                  }
                 },
               );
             },
@@ -212,8 +237,8 @@ class _EventManagePageState extends State<EventManagePage> {
             style: GoogleFonts.anekDevanagari(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: Container(
-            width: 300, // Fixed width
-            height: 400, // Fixed height
+            width: 320, // Fixed width
+            height: 350, // Fixed height
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -222,17 +247,29 @@ class _EventManagePageState extends State<EventManagePage> {
                     'Date',
                     '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} (${event['day']}) ${event['startTime']} to ${event['endTime']}',
                   ),
-                  _buildEventDetail('Venue', event['restaurantName']),
+                  FutureBuilder<Map<String, String>>(
+                    future: _getRestaurantDataFromId(event['restaurantId']),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Text('Loading...');
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        var restaurantData = snapshot.data!;
+                        return _buildEventDetail('Venue', restaurantData['name']!);
+                      }
+                    },
+                  ),
                   _buildEventDetail('Cuisine Type', event['cuisineType']),
                   const SizedBox(height: 8),
                   Text(
                     'Description:',
-                    style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold),
+                    style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold,fontSize: 20),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     event['description'],
-                    style: GoogleFonts.anekDevanagari(),
+                    style: GoogleFonts.anekDevanagari(fontSize: 18),
                   ),
                   const SizedBox(height: 8),
                   Align(
@@ -247,7 +284,7 @@ class _EventManagePageState extends State<EventManagePage> {
                         } else {
                           return Text(
                             'by: ${snapshot.data ?? 'Unknown'}',
-                            style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold),
+                            style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold,fontSize: 18),
                           );
                         }
                       },
@@ -268,6 +305,23 @@ class _EventManagePageState extends State<EventManagePage> {
         );
       },
     );
+  }
+
+  Future<Map<String, String>> _getRestaurantDataFromId(DocumentReference restaurantRef) async {
+    DocumentSnapshot restaurantSnapshot = await restaurantRef.get();
+    if (restaurantSnapshot.exists && restaurantSnapshot.data() != null) {
+      var data = restaurantSnapshot.data() as Map<String, dynamic>;
+      if (data.containsKey('name') && data.containsKey('logo')) {
+        return {
+          'name': data['name'],
+          'logo': data['logo'],
+        };
+      } else {
+        throw Exception('name or logo field does not exist in the restaurants document');
+      }
+    } else {
+      throw Exception('restaurants document does not exist');
+    }
   }
 
   Future<String> _getUsernameFromUserId(String hostUserId) async {
@@ -292,12 +346,12 @@ class _EventManagePageState extends State<EventManagePage> {
         children: <Widget>[
           Text(
             '$label: ',
-            style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold),
+            style: GoogleFonts.anekDevanagari(fontWeight: FontWeight.bold, fontSize: 20),
           ),
           Expanded(
             child: Text(
               value,
-              style: GoogleFonts.anekDevanagari(),
+              style: GoogleFonts.anekDevanagari(fontSize: 18),
             ),
           ),
         ],
