@@ -54,6 +54,7 @@ class _SignUpPageState extends State<SignUpPage> {
         role: _selectedRole!,
       );
 
+
       // Send notification to admin
       final NotificationService notificationService = NotificationService();
       await notificationService.sendNotification(

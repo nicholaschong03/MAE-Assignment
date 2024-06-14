@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
+import '../adminpage/adminpage.dart';
+import 'package:jom_eat_project/foodie/screens/foodie_home_screen.dart';
 import '../adminpage GUI/admin_main.dart';
 import '../ccpage GUI/cc_main.dart';
 import '../adminfunction/policy.dart';
@@ -69,10 +71,10 @@ class _LoginPageState extends State<LoginPage> {
 
 
       if (userRole == 'foodie' && !isSuspended) {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => FoodiePage(userId: userId, role: userRole)),
-        // );
+        Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => FoodieHomeScreen(userId: userId, role: userRole)),
+        );
       } else if (userRole == 'admin' && !isSuspended) {
         Navigator.pushReplacement(
           context,
@@ -149,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                   width: 200,
                   height: 200,
                 ),
+
                 const SizedBox(height: 16.0),
                 // Email TextField
                 TextField(
