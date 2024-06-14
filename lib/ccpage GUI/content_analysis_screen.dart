@@ -37,7 +37,7 @@ class _ContentAnalysisScreenState extends State<ContentAnalysisScreen> {
                       barGroups: contents.map((content) => BarChartGroupData(
                         x: contents.indexOf(content),
                         barRods: [
-                          BarChartRodData(y: content.likes.toDouble(), colors: [Colors.blue])
+                          BarChartRodData(fromY: content.likes.toDouble(), color: Colors.blue, toY: 0.0)
                         ],
                       )).toList(),
                     ),

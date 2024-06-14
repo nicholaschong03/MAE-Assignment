@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jom_eat_project/foodie/screens/foodie_profile_screen.dart';
 import 'package:jom_eat_project/foodie/widgets/profile_picture_widget.dart';
 import 'package:jom_eat_project/foodie/widgets/swipe_to_join_outing_widget.dart';
 import 'package:jom_eat_project/models/outing_group_model.dart';
@@ -7,8 +8,10 @@ import 'package:jom_eat_project/services/database_service.dart';
 
 class OutingProfileScreen extends StatefulWidget {
   final String outingId;
+  final String userId;
 
-  const OutingProfileScreen({super.key, required this.outingId});
+  const OutingProfileScreen(
+      {super.key, required this.outingId, required this.userId});
 
   @override
   State<OutingProfileScreen> createState() => _OutingProfileScreenState();
@@ -19,19 +22,45 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
   bool isSwipeWidgetVisible =
       true; // Track visibility of SwipeToJoinOutingWidget
   Key swipeWidgetKey = UniqueKey(); //
+  final DataService databaseService = DataService();
 
-  void _cancelRegistration() {
-    setState(() {
-      memberIsJoining = false;
-      isSwipeWidgetVisible = true; // Make the widget visible again
-      swipeWidgetKey = UniqueKey(); // Generate a new key to rebuild the widget
-    });
+  @override
+  void initState() {
+    super.initState();
+    _checkMembershipStatus();
+  }
+
+  Future<void> _checkMembershipStatus() async {
+    try {
+      OutingGroupModel outing =
+          await databaseService.getOuting(widget.outingId);
+      if (outing.isUserMember(widget.userId)) {
+        setState(() {
+          memberIsJoining = true;
+          isSwipeWidgetVisible = false;
+        });
+      }
+    } catch (e) {
+      print("Error checking membership status: $e");
+    }
+  }
+
+  void _cancelRegistration() async {
+    try {
+      await databaseService.cancelOuting(widget.outingId, widget.userId);
+      setState(() {
+        memberIsJoining = false;
+        isSwipeWidgetVisible = true; // Make the widget visible again
+        swipeWidgetKey =
+            UniqueKey(); // Generate a new key to rebuild the widget
+      });
+    } catch (e) {
+      print("Error cancelling outing: $e");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final DataService databaseService = DataService();
-
     return Scaffold(
       body: FutureBuilder<OutingGroupModel>(
         future: databaseService.getOuting(widget.outingId),
@@ -59,14 +88,11 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
           slivers: [
             _buildAppBar(),
             _buildBusinessPhotoSlider(
-              businessPhotoUrls: outing.restaurantPhotos,
-            ),
+                businessPhotoUrls: outing.restaurant!.photos),
             _buildOutingBasicDetails(outing),
             if (memberIsJoining == true) _buildCancelJoin(),
             if (outing.members.isNotEmpty)
-              _buildJoiningAttendees(
-                members: outing.members,
-              ),
+              _buildJoiningAttendees(members: outing.members),
             const SliverToBoxAdapter(child: SizedBox(height: 32)),
           ],
         ),
@@ -86,11 +112,12 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
             child: SwipeToJoinOutingWidget(
               key: swipeWidgetKey,
               onRegistrationComplete: () {
-                // TODO: Implement logic for joining outing
                 setState(() {
                   memberIsJoining = true;
                 });
               },
+              outingId: widget.outingId,
+              userId: widget.userId,
             ),
           ),
         ),
@@ -119,10 +146,7 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
 
     return SliverToBoxAdapter(
       child: SizedBox(
-        // List View Width
         width: MediaQuery.of(context).size.width,
-        // List View Height
-        // Padding: ListView Padding
         height: businessPhotoUrls.length <= 1
             ? (cardHeight + (3 * cardPadding))
             : cardHeight,
@@ -130,7 +154,6 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
           shrinkWrap: true,
           scrollDirection: Axis.horizontal,
           itemCount: businessPhotoUrls.length,
-          // Screen Horizontal Padding
           padding: EdgeInsets.symmetric(
             horizontal: businessPhotoUrls.length <= 1 ? 16 : 16 - cardPadding,
           ),
@@ -139,30 +162,18 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
               padding: businessPhotoUrls.length <= 1
                   ? const EdgeInsets.symmetric(horizontal: 0)
                   : EdgeInsets.symmetric(horizontal: cardPadding),
-              // Actual Photo Card
               child: AspectRatio(
                 aspectRatio: 4.0 / 3.0,
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(16.0),
-                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(16.0)),
                   ),
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.all(
-                      Radius.circular(16.0),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(16.0),
-                      ),
-                      child: Image.network(
-                        businessPhotoUrls[index],
-                        fit: BoxFit.fill,
-                      ),
-                    ),
+                    borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+                    child: Image.network(businessPhotoUrls[index],
+                        fit: BoxFit.fill),
                   ),
                 ),
               ),
@@ -177,8 +188,6 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
     double businessProfilePictureSize = 64;
     double businessProfilePictureRadius = businessProfilePictureSize / 2;
     double iconSize = 20;
-    // BusinessOperatingLocation? businessOperatingLocation =
-    //     business.businessOperatingLocation;
 
     return SliverToBoxAdapter(
       child: Container(
@@ -194,19 +203,29 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
             Row(
               children: [
                 // Business Profile Picture
-                // TODO: Add business logo
-                // NetworkImage(outing.logo)
+                // Display business logo using Image widget
+                Container(
+                  width: businessProfilePictureSize,
+                  height: businessProfilePictureSize,
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(businessProfilePictureRadius),
+                    image: DecorationImage(
+                      image: NetworkImage(outing.restaurant.logo),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
 
                 // Distance between Business's Profile Picture and Business's Name
                 const SizedBox(width: 12),
-
                 Flexible(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Business Name
                       Text(
-                        outing.restaurantName,
+                        outing.restaurant!.name,
                         style: Theme.of(context).textTheme.titleMedium,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -224,7 +243,7 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
               children: [
                 Icon(Icons.calendar_month_outlined, size: iconSize),
                 const SizedBox(width: 8),
-                Text(outing.date.toString()),
+                Text(formatDate(outing.date).toString()),
               ],
             ),
             const SizedBox(height: 8),
@@ -250,7 +269,7 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
-                      outing.location,
+                      outing.restaurant!.location,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -333,81 +352,83 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
   }
 
   Widget _buildJoiningAttendees({required List<UserModel> members}) {
-  const double profilePictureSize = 36;
-  const double profilePictureStackPadding = profilePictureSize * 0.7;
+    const double profilePictureSize = 36;
+    const double profilePictureStackPadding = profilePictureSize * 0.7;
 
-  return SliverToBoxAdapter(
-    child: GestureDetector(
-      // onTap: () => GoRouter.of(context).pushNamed(
-      //   Routes.outingAttendees,
-      //   pathParameters: {
-      //     'outingId': 'widget.outingId',
-      //   },
-      // ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            Stack(
-              children: List.generate(
-                members.length,
-                (index) {
-                  if (index < 3) {
-                    return Padding(
-                      padding: EdgeInsets.only(left: index * profilePictureStackPadding),
-                      child: ProfilePictureWidget(
-                        imageUrl: members[index].profileImage,
-                        width: profilePictureSize,
-                        height: profilePictureSize,
-                        borderRadius: profilePictureSize,
-                        borderColor: Theme.of(context).scaffoldBackgroundColor,
-                      ),
-                    );
-                  }
-                  return SizedBox.shrink();
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: RichText(
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  children: _buildMembersText(members),
+    return SliverToBoxAdapter(
+      child: GestureDetector(
+        // onTap: () => GoRouter.of(context).pushNamed(
+        //   Routes.outingAttendees,
+        //   pathParameters: {
+        //     'outingId': 'widget.outingId',
+        //   },
+        // ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Stack(
+                children: List.generate(
+                  members.length,
+                  (index) {
+                    if (index < 3) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                            left: index * profilePictureStackPadding),
+                        child: ProfilePictureWidget(
+                          imageUrl: members[index].profileImage,
+                          width: profilePictureSize,
+                          height: profilePictureSize,
+                          borderRadius: profilePictureSize,
+                          borderColor:
+                              Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      );
+                    }
+                    return SizedBox.shrink();
+                  },
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Flexible(
+                child: RichText(
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    children: _buildMembersText(members),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-List<TextSpan> _buildMembersText(List<UserModel> members) {
-  List<TextSpan> textSpans = [const TextSpan(text: 'Joined by ')];
-  if (members.isNotEmpty) {
-    textSpans.add(TextSpan(
-      text: members[0].username,
-      style: Theme.of(context).textTheme.titleSmall,
-    ));
+  List<TextSpan> _buildMembersText(List<UserModel> members) {
+    List<TextSpan> textSpans = [const TextSpan(text: 'Joined by ')];
+    if (members.isNotEmpty) {
+      textSpans.add(TextSpan(
+        text: members[0].username,
+        style: Theme.of(context).textTheme.titleSmall,
+      ));
+    }
+    if (members.length > 1) {
+      textSpans.add(const TextSpan(text: ' and '));
+      textSpans.add(TextSpan(
+        text: members[1].username,
+        style: Theme.of(context).textTheme.titleSmall,
+      ));
+    }
+    if (members.length > 2) {
+      textSpans.add(const TextSpan(text: ' and '));
+      textSpans.add(TextSpan(
+        text: '${members.length - 2} others',
+        style: Theme.of(context).textTheme.titleSmall,
+      ));
+    }
+    return textSpans;
   }
-  if (members.length > 1) {
-    textSpans.add(const TextSpan(text: ' and '));
-    textSpans.add(TextSpan(
-      text: members[1].username,
-      style: Theme.of(context).textTheme.titleSmall,
-    ));
-  }
-  if (members.length > 2) {
-    textSpans.add(const TextSpan(text: ' and '));
-    textSpans.add(TextSpan(
-      text: '${members.length - 2} others',
-      style: Theme.of(context).textTheme.titleSmall,
-    ));
-  }
-  return textSpans;
-}
 }

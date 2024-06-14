@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jom_eat_project/models/foodie_model.dart';
 import 'package:jom_eat_project/models/user_model.dart';
-import 'package:jom_eat_project/services/database_service.dart';
+import 'package:jom_eat_project/models/restaurant_model.dart';
 
 class OutingGroupModel {
   final String id;
@@ -12,14 +12,11 @@ class OutingGroupModel {
   final String day;
   final String startTime;
   final String endTime;
-  final String restaurantId;
-  final String restaurantName;
   final FoodieModel createdByUser;
   final List<UserModel> members;
   final int maxMembers;
   final String image;
-  final List<String> restaurantPhotos;
-  final String location;
+  final RestaurantModel restaurant;
   final int membersCount;
 
   OutingGroupModel({
@@ -31,24 +28,39 @@ class OutingGroupModel {
     required this.day,
     required this.startTime,
     required this.endTime,
-    required this.restaurantId,
-    required this.restaurantName,
     required this.createdByUser,
     required this.members,
     required this.membersCount,
     required this.maxMembers,
     required this.image,
-    required this.location,
-    required this.restaurantPhotos,
+    required this.restaurant,
   });
 
   static Future<OutingGroupModel> fromFirestore(
-      DocumentSnapshot doc, FoodieModel createdByUser, Future<UserModel> Function(String) getUser) async {
+    DocumentSnapshot doc,
+    FoodieModel createdByUser,
+    Future<UserModel> Function(String) getUser,
+    Future<RestaurantModel> Function(String) getRestaurant,
+  ) async {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-    List<UserModel> members = await Future.wait(
-      (data['members'] ?? []).map<Future<UserModel>>((userId) async => await getUser(userId)),
-    );
+    // Ensure 'members' is a non-empty list of valid user IDs
+    List<UserModel> members = [];
+    if (data['members'] != null && data['members'].isNotEmpty) {
+      members = await Future.wait(
+        (data['members'] as List<dynamic>).map<Future<UserModel>>((userId) async {
+          if (userId != null && userId.isNotEmpty) {
+            return await getUser(userId);
+          } else {
+            throw Exception("Invalid userId in members list");
+          }
+        }),
+      );
+    }
+
+    // Ensure 'restaurantId' is a valid document reference
+    DocumentReference restaurantRef = data['restaurantId'] as DocumentReference;
+    RestaurantModel restaurant = await getRestaurant(restaurantRef.id);
 
     return OutingGroupModel(
       id: doc.id,
@@ -59,15 +71,16 @@ class OutingGroupModel {
       day: data['day'] ?? '',
       startTime: data['startTime'] ?? '',
       endTime: data['endTime'] ?? '',
-      restaurantId: data['restaurantId'] ?? '',
-      restaurantName: data['restaurantName'] ?? '',
       createdByUser: createdByUser,
       members: members,
       maxMembers: data['maxMembers'] ?? 0,
       image: data['image'] ?? '',
-      location: data['location'] ?? '',
+      restaurant: restaurant,
       membersCount: data['membersCount'] ?? 0,
-      restaurantPhotos: List<String>.from(data['restaurantPhotos'] ?? []),
     );
+  }
+
+  bool isUserMember(String userId) {
+    return members.any((member) => member.id == userId);
   }
 }

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:jom_eat_project/services/database_service.dart';
 import 'package:jom_eat_project/foodie/widgets/promotion_card.dart';
 import 'package:jom_eat_project/models/outing_group_model.dart';
 import 'package:jom_eat_project/models/promotion_model.dart';
 import 'package:jom_eat_project/models/foodie_model.dart';
-
+import 'package:jom_eat_project/foodie/screens/outing_profile_screen.dart';
 import 'package:jom_eat_project/foodie/widgets/discover_group_card.dart';
 import 'package:jom_eat_project/foodie/widgets/popular_outing_card.dart';
 import 'package:jom_eat_project/foodie/widgets/section_title_row.dart';
@@ -33,167 +32,163 @@ class _FoodieHomeScreenState extends State<FoodieHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // body: _buildAppBar(context),
-        body: FutureBuilder<FoodieModel>(
-            future: _foodieFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData) {
-                return const Center(child: Text('User data not found.'));
-              } else {
-                FoodieModel foodie = snapshot.data!;
-                return _buildAppBar(context, foodie);
-              }
-            }));
+      body: FutureBuilder<FoodieModel>(
+        future: _foodieFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData) {
+            return const Center(child: Text('User data not found.'));
+          } else {
+            FoodieModel foodie = snapshot.data!;
+            return _buildAppBar(context, foodie);
+          }
+        },
+      ),
+    );
   }
 
   Widget _buildAppBar(BuildContext context, FoodieModel foodie) {
-    print('Building AppBar for: ${foodie.name}'); // Debug statement
-
     return NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              surfaceTintColor: Colors.transparent,
-              expandedHeight: 160,
-              floating: false,
-              pinned: true,
-              title: Text(
-                'Foodie Home Dashboard',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              flexibleSpace: FlexibleSpaceBar(
-                collapseMode: CollapseMode.pin,
-                background: DecoratedBox(
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return [
+          SliverAppBar(
+            surfaceTintColor: Colors.transparent,
+            expandedHeight: 160,
+            floating: false,
+            pinned: true,
+            title: Text(
+              'Foodie Home Dashboard',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.pin,
+              background: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.orange.shade200, Colors.yellow.shade500],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: DecoratedBox(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.orange.shade200, Colors.yellow.shade500],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                    gradient: RadialGradient(
+                      colors: [
+                        const Color.fromRGBO(242, 244, 249, 1).withOpacity(1),
+                        const Color.fromRGBO(255, 155, 104, 1)
+                            .withOpacity(0.5),
+                      ],
+                      center: const Alignment(0.1, 1.0),
+                      radius: 5,
+                      focalRadius: 1,
                     ),
                   ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: RadialGradient(
-                        colors: [
-                          const Color.fromRGBO(242, 244, 249, 1).withOpacity(1),
-                          const Color.fromRGBO(255, 155, 104, 1)
-                              .withOpacity(0.5),
-                        ],
-                        center: const Alignment(0.1, 1.0),
-                        radius: 5,
-                        focalRadius: 1,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              //Profile picture
-                              Container(
-                                  height: 64,
-                                  width: 64,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        const Color.fromRGBO(242, 244, 249, 1),
-                                    borderRadius: BorderRadius.circular(64),
-                                  ),
-                                  padding: const EdgeInsets.all(2),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(82),
-                                    child: Image.network(
-                                      foodie.profileImage,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 64,
+                              width: 64,
+                              decoration: BoxDecoration(
+                                color:
+                                    const Color.fromRGBO(242, 244, 249, 1),
+                                borderRadius: BorderRadius.circular(64),
+                              ),
+                              padding: const EdgeInsets.all(2),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(82),
+                                child: Image.network(
+                                  foodie.profileImage,
+                                  height: 62,
+                                  width: 62,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      return child;
+                                    }
+                                    return Image.asset(
+                                      'assets/images/profile.jpg',
+                                      fit: BoxFit.cover,
                                       height: 62,
                                       width: 62,
-                                      fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                        if (loadingProgress == null) {
-                                          return child;
-                                        }
-                                        return Image.asset(
-                                          'assets/images/profile.jpg',
-                                          fit: BoxFit.cover,
-                                          height: 62,
-                                          width: 62,
-                                        );
-                                      },
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              Image.asset(
-                                                  'assets/images/profile.jpg',
-                                                  fit: BoxFit.cover,
-                                                  height: 62,
-                                                  width: 62),
-                                    ),
-                                  )),
-                              const SizedBox(width: 16),
-
-                              // Name
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  // Name
-                                  Text(
-                                    'Hi ${foodie.name}',
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
-                                  ),
-                                  const SizedBox(height: 8),
-
-                                  Row(
-                                    children: [
-                                      _membershipStatus(
-                                          context, foodie.membershipStatus),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '${foodie.points} Points',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                              color: const Color.fromARGB(
-                                                  255, 243, 132, 42),
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                    );
+                                  },
+                                  errorBuilder:
+                                      (context, error, stackTrace) =>
+                                          Image.asset(
+                                              'assets/images/profile.jpg',
+                                              fit: BoxFit.cover,
+                                              height: 62,
+                                              width: 62),
+                                ),
                               ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                              topRight: Radius.circular(16),
                             ),
+                            const SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Hi ${foodie.name}',
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    _membershipStatus(
+                                        context, foodie.membershipStatus),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${foodie.points} Points',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: const Color.fromARGB(
+                                                255, 243, 132, 42),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ];
-        },
-        body: _buildContent(context));
+          ),
+        ];
+      },
+      body: _buildContent(context),
+    );
   }
 
   Widget _buildContent(BuildContext context) {
@@ -215,19 +210,14 @@ class _FoodieHomeScreenState extends State<FoodieHomeScreen> {
       stream: _dataService.getTodayDiningGroups(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          print("A");
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          print("B");
-          print('Error: ${snapshot.error}');
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          print("C");
           return const Center(child: Text('No outings found.'));
         } else {
           var outings = snapshot.data!;
           double imageAspectRatio = 16 / 9;
-          print("Outings: $outings");
 
           // View
           double viewWidth = MediaQuery.of(context).size.width;
@@ -262,20 +252,32 @@ class _FoodieHomeScreenState extends State<FoodieHomeScreen> {
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
                   itemCount: outings.length,
-                  // Screen Horizontal Padding
                   padding: EdgeInsets.symmetric(
                     horizontal: viewHorizontalPadding,
                     vertical: viewVerticalPadding,
                   ),
                   itemBuilder: (context, index) {
                     var outing = outings[index];
-                    return DiscoverGroupCard(
-                      group: outing,
-                      cardWidth: cardWidth,
-                      cardHeight: cardHeight,
-                      cardBorderRadius: cardBorderRadius,
-                      cardHorizontalMargin: cardHorizontalMargin,
-                      imageAspectRatio: imageAspectRatio,
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OutingProfileScreen(
+                              outingId: outing.id,
+                              userId: widget.userId,
+                            ),
+                          ),
+                        );
+                      },
+                      child: DiscoverGroupCard(
+                        group: outing,
+                        cardWidth: cardWidth,
+                        cardHeight: cardHeight,
+                        cardBorderRadius: cardBorderRadius,
+                        cardHorizontalMargin: cardHorizontalMargin,
+                        imageAspectRatio: imageAspectRatio,
+                      ),
                     );
                   },
                 ),
@@ -322,8 +324,6 @@ class _FoodieHomeScreenState extends State<FoodieHomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SectionTitleRow(title: "Promotions"),
-
-              // List of Promotions
               SizedBox(
                 width: viewWidth,
                 height: viewHeight,
@@ -331,7 +331,6 @@ class _FoodieHomeScreenState extends State<FoodieHomeScreen> {
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
                   itemCount: promotions.length,
-                  // Screen Horizontal Padding
                   padding: EdgeInsets.symmetric(
                     horizontal: viewHorizontalPadding,
                     vertical: viewVerticalPadding,
@@ -354,77 +353,87 @@ class _FoodieHomeScreenState extends State<FoodieHomeScreen> {
         }
       },
     );
-
-    // Image
   }
 
   Widget _buildPopularOutingSection(BuildContext context) {
     return StreamBuilder<List<OutingGroupModel>>(
-        stream: _dataService.getAllOutingGroups(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No popular outings found."));
-          } else {
-            var popularOutings = snapshot.data!;
-            double viewWidth = MediaQuery.of(context).size.width;
+      stream: _dataService.getAllOutingGroups(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text("No popular outings found."));
+        } else {
+          var popularOutings = snapshot.data!;
+          double viewWidth = MediaQuery.of(context).size.width;
 
-            const double viewHorizontalPadding = 8;
-            const double viewVerticalPadding = 8;
+          const double viewHorizontalPadding = 8;
+          const double viewVerticalPadding = 8;
 
-            //Card
-            const double showCardAmount = 1.15;
-            const double cardAspectRatio = 0.35;
+          // Card
+          const double showCardAmount = 1.15;
+          const double cardAspectRatio = 0.35;
 
-            double cardWidth =
-                (viewWidth - viewHorizontalPadding) / showCardAmount;
+          double cardWidth =
+              (viewWidth - viewHorizontalPadding) / showCardAmount;
 
-            // Non-editable (maths calculation)
-            double cardHeight = cardWidth * cardAspectRatio;
+          // Non-editable (maths calculation)
+          double cardHeight = cardWidth * cardAspectRatio;
 
-            double viewHeight = (2 * viewVerticalPadding) + (2 * cardHeight);
+          double viewHeight = (2 * viewVerticalPadding) + (2 * cardHeight);
 
-            return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SectionTitleRow(title: "Popular Outings"),
-                  SizedBox(
-                    width: viewWidth,
-                    height: viewHeight,
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 0,
-                        crossAxisSpacing: 0,
-                        childAspectRatio: cardAspectRatio,
-                      ),
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: popularOutings.length,
-                      // Screen Horizontal Padding
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: viewHorizontalPadding, // 8px
-                        vertical: viewVerticalPadding, // 16px
-                      ),
-                      itemBuilder: (context, index) {
-                        // TrendingMenuItem menuItem = trendingMenuItems[index];
-                        var outing = popularOutings[index];
-                        return PopularOutingCard(
-                          outing: outing,
-                          cardWidth: cardWidth,
-                          cardHeight: cardHeight,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SectionTitleRow(title: "Popular Outings"),
+              SizedBox(
+                width: viewWidth,
+                height: viewHeight,
+                child: GridView.builder(
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 0,
+                    crossAxisSpacing: 0,
+                    childAspectRatio: cardAspectRatio,
+                  ),
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: popularOutings.length,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: viewHorizontalPadding,
+                    vertical: viewVerticalPadding,
+                  ),
+                  itemBuilder: (context, index) {
+                    var outing = popularOutings[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OutingProfileScreen(
+                              outingId: outing.id,
+                              userId: widget.userId,
+                            ),
+                          ),
                         );
                       },
-                    ),
-                  ),
-                ]);
-          }
-        });
-    // View
+                      child: PopularOutingCard(
+                        outing: outing,
+                        cardWidth: cardWidth,
+                        cardHeight: cardHeight,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+      },
+    );
   }
 
   Widget _membershipStatus(BuildContext context, String status) {
@@ -433,7 +442,7 @@ class _FoodieHomeScreenState extends State<FoodieHomeScreen> {
     } else if (status == 'silver') {
       return _silverMembershipStatus(context);
     } else {
-      return Container(); // Return an empty container if status is neither gold nor silver
+      return Container();
     }
   }
 

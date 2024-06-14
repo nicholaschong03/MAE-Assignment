@@ -8,9 +8,9 @@ import 'package:jom_eat_project/models/foodie_model.dart';
 import 'package:jom_eat_project/services/database_service.dart';
 import 'dart:ui'; // Add this import
 
-
 class FoodieProfileScreen extends StatefulWidget {
-  const FoodieProfileScreen({super.key});
+  const FoodieProfileScreen({super.key, required this.userId});
+  final String userId;
 
   @override
   State<FoodieProfileScreen> createState() => _FoodieProfileScreenState();
@@ -20,8 +20,9 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
   bool darkMode = true;
 
   @override
-  Widget build(BuildContext ) {
-    final String userId = 'AZwrBrL0xBcNKOkdqdDBvBMWRyJ3'; // Replace with the actual user ID
+  Widget build(BuildContext) {
+    final String userId =
+        widget.userId; // Replace with the actual user ID
     final DataService _databaseService = DataService();
 
     return Scaffold(
@@ -38,7 +39,8 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
             return const Center(child: Text('User data not found.'));
           } else {
             FoodieModel user = snapshot.data!;
-            print('User data: ${user.name}, ${user.email}, ${user.profileImage}');
+            print(
+                'User data: ${user.name}, ${user.email}, ${user.profileImage}');
             return _buildBody(user);
           }
         },
@@ -54,7 +56,10 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
             gradient: RadialGradient(
               center: Alignment.topCenter,
               radius: 1.5,
-              colors: [Color.fromARGB(255, 236, 163, 95), Color.fromARGB(255, 255, 102, 0)],
+              colors: [
+                Color.fromARGB(255, 236, 163, 95),
+                Color.fromARGB(255, 255, 102, 0)
+              ],
               stops: [0.1, 0.7],
             ),
           ),
@@ -100,7 +105,9 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: ProfilePictureWidget(
-                  imageUrl: user.profileImage.isNotEmpty ? user.profileImage : 'https://example.com/default_image.png',
+                  imageUrl: user.profileImage.isNotEmpty
+                      ? user.profileImage
+                      : 'https://example.com/default_image.png',
                   width: 96,
                   height: 96,
                   borderRadius: 48,
@@ -163,7 +170,8 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
           Text(
             'Foodie',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: darkMode ? Colors.white : Theme.of(context).primaryColor,
+                  color:
+                      darkMode ? Colors.white : Theme.of(context).primaryColor,
                 ),
           ),
           const SizedBox(height: 24),
@@ -356,7 +364,10 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
   }
 
   Widget _buildPointsBreakdown(FoodieModel user) {
-    return PointsBreakdownWidget(darkMode: darkMode, points: user.outingParticipationPoint, engagementScore: user.engagementScore);
+    return PointsBreakdownWidget(
+        darkMode: darkMode,
+        points: user.outingParticipationPoint,
+        engagementScore: user.engagementScore);
   }
 
   Widget _buildMyBadges(FoodieModel user) {
@@ -403,4 +414,9 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
       ),
     );
   }
+}
+
+// Function to format DateTime to yyyy-MM-dd
+String formatDate(DateTime dateTime) {
+  return "${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}";
 }
