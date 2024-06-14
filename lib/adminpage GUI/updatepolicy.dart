@@ -18,7 +18,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
   @override
   void initState() {
     super.initState();
-    policyData = PolicyData(userId: widget.userId); // Initialize PolicyData
+    policyData = PolicyData(); // Initialize PolicyData
     _policiesFuture = policyData.getPolicies();
   }
 

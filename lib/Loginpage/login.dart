@@ -4,7 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage GUI/admin_main.dart';
-import '../common function/user_services.dart'; // Import UserService
+import '../common function/user_services.dart';
+import '../adminfunction/policy.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -16,9 +17,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   bool _isEmailValid = true;
   bool _isPasswordValid = true;
+  bool _acceptPolicies = false;
 
   void _validateInputs() {
     setState(() {
@@ -26,8 +27,12 @@ class _LoginPageState extends State<LoginPage> {
       _isPasswordValid = _passwordController.text.isNotEmpty;
     });
 
-    if (_isEmailValid && _isPasswordValid) {
+    if (_isEmailValid && _isPasswordValid && _acceptPolicies) {
       _loginUser();
+    } else if (!_acceptPolicies) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('You must accept the platform policies to log in.'),
+      ));
     }
   }
 
@@ -58,8 +63,8 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       Map<String, dynamic> userData = await UserData(userId: userId).getUserData();
-      String userRole = userData['role'];
-      bool isSuspended = userData['isSuspended'];
+      String userRole = userData['role'] ?? 'unknown';
+      bool isSuspended = userData['isSuspended'] ?? false;
 
       if (userRole == 'foodie' && !isSuspended) {
         // Navigator.pushReplacement(
@@ -89,12 +94,45 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _showPoliciesDialog(BuildContext context) async {
+    List<Map<String, dynamic>> policies = await PolicyData().getPolicies();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Platform Policies', style: GoogleFonts.georama(color: const Color(0xFFF35000), fontSize: 18.0, fontWeight: FontWeight.w500)),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: policies.length,
+              itemBuilder: (context, index) {
+                var policy = policies[index];
+                return ListTile(
+                  title: Text(policy['title'] ?? 'No Title', style: GoogleFonts.georama(fontWeight: FontWeight.bold)),
+                  subtitle: Text(policy['details'] ?? 'No details', style: GoogleFonts.georama()),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Close', style: GoogleFonts.georama(color: const Color(0xFFF35000), fontSize: 16.0, fontWeight: FontWeight.w500)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color:Color.fromARGB(255, 255, 234, 211),
+          color: Color.fromARGB(255, 255, 234, 211),
         ),
         padding: const EdgeInsets.all(30.0),
         child: Center(
@@ -140,6 +178,34 @@ class _LoginPageState extends State<LoginPage> {
                     filled: true,
                   ),
                   obscureText: true,
+                ),
+                const SizedBox(height: 16.0),
+                // Checkbox for Platform Policies
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _acceptPolicies,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _acceptPolicies = value ?? false;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 8.0),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _showPoliciesDialog(context),
+                        child: Text(
+                          'View platform policies',
+                          style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16.0),
                 // Row containing Forget Password and Login buttons
