@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage/adminpage.dart';
 import 'package:jom_eat_project/foodie/screens/foodie_home_screen.dart';
+import '../adminpage GUI/admin_main.dart';
+import '../ccpage GUI/cc_main.dart';
+import '../adminfunction/policy.dart';
+import '../common function/user_services.dart'; 
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key});
+  const LoginPage({Key? key}) : super(key: key);
+
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -15,9 +20,9 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   bool _isEmailValid = true;
   bool _isPasswordValid = true;
+  bool _acceptPolicies = false;
 
   void _validateInputs() {
     setState(() {
@@ -25,21 +30,22 @@ class _LoginPageState extends State<LoginPage> {
       _isPasswordValid = _passwordController.text.isNotEmpty;
     });
 
-    if (_isEmailValid && _isPasswordValid) {
+    if (_isEmailValid && _isPasswordValid && _acceptPolicies) {
       _loginUser();
+    } else if (!_acceptPolicies) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('You must accept the platform policies to log in.'),
+      ));
     }
   }
 
   Future<void> _loginUser() async {
     try {
-      // Sign in with Firebase Authentication
-      UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
-      // Check if email is verified
       if (userCredential.user?.emailVerified ?? false) {
         _redirectToPageBasedOnRole(userCredential.user?.uid);
       } else {
@@ -58,32 +64,71 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _redirectToPageBasedOnRole(String? userId) async {
     if (userId == null) return;
 
-    DocumentSnapshot userDoc =
-        await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    String userRole = userDoc.get('role');
-    // String userId = userDoc.get('userId');
+    try {
+      Map<String, dynamic> userData = await UserData(userId: userId).getUserData();
+      String userRole = userData['role'] ?? 'unknown';
+      bool isSuspended = userData['isSuspended'] ?? false;
 
-    if (userRole == 'foodie') {
-      Navigator.pushReplacement(
+
+      if (userRole == 'foodie' && !isSuspended) {
+        Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => FoodieHomeScreen(userId: userId)),
-      );
-    } else if (userRole == 'admin') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => AdminPage()),
-      );
-    } else if (userRole == 'cc') {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => ContentCreatorPage()),
-      // );
-    } else {
-      // Handle unknown user role
+        MaterialPageRoute(builder: (context) => FoodieHomeScreen(userId: userId, role: userRole)),
+        );
+      } else if (userRole == 'admin' && !isSuspended) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => AdminPage(userId: userId, role: userRole)),
+        );
+      } else if (userRole == 'cc' && !isSuspended) {
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
+        // );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Unknown User or Suspended User'),
+        ));
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Unknown User'),
+        content: Text('Failed to retrieve user data.'),
       ));
     }
+  }
+
+  Future<void> _showPoliciesDialog(BuildContext context) async {
+    List<Map<String, dynamic>> policies = await PolicyData().getPolicies();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Platform Policies', style: GoogleFonts.georama(color: const Color(0xFFF35000), fontSize: 18.0, fontWeight: FontWeight.w500)),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: policies.length,
+              itemBuilder: (context, index) {
+                var policy = policies[index];
+                return ListTile(
+                  title: Text(policy['title'] ?? 'No Title', style: GoogleFonts.georama(fontWeight: FontWeight.bold)),
+                  subtitle: Text(policy['details'] ?? 'No details', style: GoogleFonts.georama()),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Close', style: GoogleFonts.georama(color: const Color(0xFFF35000), fontSize: 16.0, fontWeight: FontWeight.w500)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -91,92 +136,141 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 255, 234, 207),
+          color: Color.fromARGB(255, 255, 234, 211),
         ),
         padding: const EdgeInsets.all(30.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo
-            Image.asset(
-              'assets/images/logo.png',
-              width: 200,
-              height: 200,
-            ),
-            const SizedBox(height: 16.0),
-            // Email TextField
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                errorText: _isEmailValid ? null : 'Please enter a valid email',
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                labelStyle: const TextStyle(
-                  color: Colors.orange,
-                ),
-                fillColor: const Color.fromARGB(255, 255, 255, 255),
-                filled: true,
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            // Password TextField
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                errorText:
-                    _isPasswordValid ? null : 'Please enter a valid password',
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                ),
-                labelStyle: const TextStyle(
-                  color: Colors.orange,
-                ),
-                fillColor: Color.fromARGB(255, 255, 255, 255),
-                filled: true,
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16.0),
-            // Row containing Forget Password and Login buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Center(
+          child: SingleChildScrollView(
+            key: const Key('scrollable'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Forget Password
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ForgetPasswordPage()),
-                    );
-                  },
-                  child: const Text('Forget Password'),
+                // Logo
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: 200,
+                  height: 200,
                 ),
-                // Login Button
-                ElevatedButton(
-                  onPressed: _validateInputs,
-                  child: const Text('Login'),
+
+                const SizedBox(height: 16.0),
+                // Email TextField
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    errorText:
+                        _isEmailValid ? null : 'Please enter a valid email',
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    filled: true,
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                // Password TextField
+                TextField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    errorText: _isPasswordValid
+                        ? null
+                        : 'Please enter a valid password',
+                    border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
+                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    filled: true,
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 16.0),
+                // Checkbox for Platform Policies
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _acceptPolicies,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          _acceptPolicies = value ?? false;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 8.0),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _showPoliciesDialog(context),
+                        child: Text(
+                          'View platform policies',
+                          style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                // Row containing Forget Password and Login buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Forget Password
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ForgetPasswordPage()),
+                        );
+                      },
+                      child: Text(
+                        'Forget Password',
+                        style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    // Login Button
+                    ElevatedButton(
+                      onPressed: _validateInputs,
+                      child: Text(
+                        'Login',
+                        style: GoogleFonts.georama(
+                          color: const Color(0xFFF35000),
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignUpPage()),
+                        );
+                      },
+                      child: Text(
+                        'First time here? Sign up now',
+                        style: GoogleFonts.georama(
+                            color: const Color(0xFFF35000),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            // Row containing Sign Up button aligned to the left
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignUpPage()),
-                    );
-                  },
-                  child: const Text('First time here? Sign up now'),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );

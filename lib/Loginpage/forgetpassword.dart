@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'login.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
@@ -18,7 +19,8 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
       await _auth.sendPasswordResetEmail(email: _emailController.text);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Password reset email sent, Please check your email to reset the password'),
+          content: Text(
+              'Password reset email sent, Please check your email to reset the password'),
         ),
       ); // Redirect to login page
       Navigator.pushReplacement(
@@ -28,7 +30,8 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to send password reset email: Please recheck the email that you input'),
+          content: Text(
+              'Failed to send password reset email: Please recheck the email that you input'),
         ),
       );
     }
@@ -38,43 +41,60 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Forget Password'),
+        title: Text(
+          'Forget Password',
+          style: GoogleFonts.georama(fontSize: 24.0, letterSpacing: 0.5),
+        ),
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 234, 207),
+      backgroundColor: const Color.fromARGB(255, 255, 234, 211),
       body: Container(
         padding: const EdgeInsets.all(25),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Enter your email to reset your password',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  color: Colors.orange,
+        child: Center(
+          child: SingleChildScrollView(
+            key: const Key('scrollable'),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Enter your recovery email',
+                    style: GoogleFonts.georama(
+                      fontSize: 20.0,
+                      color: const Color(0xFFF35000),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                const SizedBox(height: 16.0),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16.0),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+                    onPressed: _resetPassword,
+                    child: Text(
+                      'Reset Password',
+                      style: GoogleFonts.georama(
+                        fontSize: 16.0,
+                        color: const Color(0xFFF35000),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16.0),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: _resetPassword,
-                child: const Text('Reset Password'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

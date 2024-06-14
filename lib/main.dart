@@ -16,17 +16,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Jom Eat',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.blueGrey.shade50,
-      ),
-      // home: const FoodieHomeScreen(userId: 'AZwrBrL0xBcNKOkdqdDBvBMWRyJ3',), // Call the login page here
-      home: const LoginPage(), // Call the login page here
-      // home: const OutingProfileScreen(
-      //   outingId: 'UYjyFsOxnhbucHWSmRU7',
-      // ),
+    return const MaterialApp(
+      home: LoginPage(), // Display Login Page
     );
   }
 }
