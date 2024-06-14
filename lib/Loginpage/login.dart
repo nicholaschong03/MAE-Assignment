@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage/adminpage.dart';
+import 'package:jom_eat_project/foodie/screens/foodie_home_screen.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key});
@@ -60,12 +61,13 @@ class _LoginPageState extends State<LoginPage> {
     DocumentSnapshot userDoc =
         await FirebaseFirestore.instance.collection('users').doc(userId).get();
     String userRole = userDoc.get('role');
+    // String userId = userDoc.get('userId');
 
     if (userRole == 'foodie') {
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => FoodiePage()),
-      // );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => FoodieHomeScreen(userId: userId)),
+      );
     } else if (userRole == 'admin') {
       Navigator.pushReplacement(
         context,
@@ -114,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
                 labelStyle: const TextStyle(
                   color: Colors.orange,
                 ),
-                fillColor: Color.fromARGB(255, 255, 255, 255),
+                fillColor: const Color.fromARGB(255, 255, 255, 255),
                 filled: true,
               ),
             ),

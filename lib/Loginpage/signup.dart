@@ -51,11 +51,26 @@ class _SignUpPageState extends State<SignUpPage> {
           .collection('users')
           .doc(userCredential.user?.uid)
           .set({
+        'id': userCredential.user?.uid,
         'email': _emailController.text,
         'role': _selectedRole,
         'name': _nameController.text,
         'username': _usernameController.text,
+        'signedUpAt': FieldValue.serverTimestamp(),
+        'profileImage': '',
       });
+
+      if (_selectedRole == 'foodie') {
+        await FirebaseFirestore.instance
+            .collection('foodies')
+            .doc(userCredential.user?.uid)
+            .set({
+          'userId': userCredential.user?.uid,
+          'engagementScore': 0,
+          'points': 1500,
+          'membershipStatus': 'silver',
+        });
+      }
 
       // Notify the user to verify their email
       ScaffoldMessenger.of(context).showSnackBar(
