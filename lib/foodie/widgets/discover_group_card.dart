@@ -42,18 +42,17 @@ class DiscoverGroupCard extends StatelessWidget {
                       BorderRadius.all(Radius.circular(cardBorderRadius)),
                   child: ImageDisplayWidget(
                     pixelRatio: MediaQuery.of(context).devicePixelRatio,
-                    imageUrl: group.image, // business.menuItemImageUrls.firstOrNull,
+                    imageUrl: group.image,
                     width: imageWidth,
                     height: imageHeight,
                   ),
                 ),
               ),
-
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            group.restaurantName, // business.businessName,
+            group.restaurant!.name,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -64,7 +63,7 @@ class DiscoverGroupCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                group.cuisineType, // business.businessCuisineType,
+                group.cuisineType,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: Theme.of(context).textTheme.labelMedium,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jom_eat_project/foodie/screens/outing_profile_screen.dart';
 import 'package:jom_eat_project/models/outing_group_model.dart';
 import '../widgets/image_display_widget.dart';
 
@@ -25,7 +26,15 @@ class PopularOutingCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        // Handle tap
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OutingProfileScreen(
+              outingId: outing.id,
+              userId: outing.createdByUser.id, // Replace with appropriate userId
+            ),
+          ),
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(
@@ -41,8 +50,7 @@ class PopularOutingCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.all(Radius.circular(cardBorderRadius)),
+              borderRadius: const BorderRadius.all(Radius.circular(cardBorderRadius)),
               child: ImageDisplayWidget(
                 width: imageWidth,
                 height: imageHeight,
@@ -51,10 +59,7 @@ class PopularOutingCard extends StatelessWidget {
               ),
             ),
             Container(
-              padding: const EdgeInsets.only(
-                left: 12,
-                right: 12,
-              ),
+              padding: const EdgeInsets.only(left: 12, right: 12),
               width: postDetailWidth,
               height: cardHeight,
               child: Column(
@@ -64,7 +69,7 @@ class PopularOutingCard extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child:  ImageDisplayWidget(
+                        child: ImageDisplayWidget(
                           width: 24,
                           height: 24,
                           pixelRatio: 1,
@@ -83,7 +88,6 @@ class PopularOutingCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // const MenuItemRating()
                   Text(
                     outing.description,
                     overflow: TextOverflow.ellipsis,

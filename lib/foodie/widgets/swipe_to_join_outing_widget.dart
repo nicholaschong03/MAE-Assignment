@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:jom_eat_project/services/database_service.dart';
 
 class SwipeToJoinOutingWidget extends StatefulWidget {
   final VoidCallback onRegistrationComplete;
+  final String outingId;
+  final String userId;
 
   const SwipeToJoinOutingWidget({
     super.key,
     required this.onRegistrationComplete,
+    required this.outingId,
+    required this.userId,
   });
 
   @override
@@ -19,6 +24,7 @@ class _SwipeToJoinOutingWidgetState extends State<SwipeToJoinOutingWidget>
   bool _isCompleted = false;
   late AnimationController _animationController;
   late Animation<double> _animation;
+  final DataService _dataService = DataService();
 
   @override
   void initState() {
@@ -40,11 +46,22 @@ class _SwipeToJoinOutingWidgetState extends State<SwipeToJoinOutingWidget>
     super.dispose();
   }
 
+  void _completeRegistration() async {
+    try {
+      await _dataService.joinOuting(widget.outingId, widget.userId);
+      widget.onRegistrationComplete();
+    } catch (e) {
+      print("Error joining outing: $e");
+      setState(() {
+        _isCompleted = false; // Reset completion status if there is an error
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double buttonSize = 56;
     double containerWidth = MediaQuery.of(context).size.width - (2 * 16);
-    // container width minus the width of the button minus the margin
     double maxDragPosition = containerWidth - buttonSize - (2 * 4);
 
     return Align(
@@ -79,7 +96,7 @@ class _SwipeToJoinOutingWidgetState extends State<SwipeToJoinOutingWidget>
               decoration: BoxDecoration(
                 color: _isCompleted
                     ? Colors.green
-                    : Theme.of(context).primaryColor,
+                    : Color.fromARGB(255, 255, 102, 0),
                 borderRadius: const BorderRadius.all(
                   Radius.circular(32),
                 ),
@@ -106,13 +123,12 @@ class _SwipeToJoinOutingWidgetState extends State<SwipeToJoinOutingWidget>
                     } else if (_dragPosition > maxDragPosition) {
                       _dragPosition = maxDragPosition;
                       _isCompleted = true;
-                      widget.onRegistrationComplete();
+                      _completeRegistration();
                     }
                   });
                 },
                 onHorizontalDragEnd: (details) {
-                  if (!_isCompleted &&
-                      _dragPosition < (maxDragPosition * 0.95)) {
+                  if (!_isCompleted && _dragPosition < (maxDragPosition * 0.95)) {
                     _animation = Tween<double>(begin: _dragPosition, end: 0.0)
                         .animate(_animationController);
                     _animationController.forward(from: 0.0);
@@ -123,7 +139,7 @@ class _SwipeToJoinOutingWidgetState extends State<SwipeToJoinOutingWidget>
                     ).animate(_animationController);
                     _animationController.forward(from: 0.0);
                     _isCompleted = true;
-                    widget.onRegistrationComplete();
+                    _completeRegistration();
                   }
                 },
                 child: AnimatedContainer(
@@ -137,7 +153,7 @@ class _SwipeToJoinOutingWidgetState extends State<SwipeToJoinOutingWidget>
                   ),
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
+                    color: Color.fromARGB(255, 243, 243, 243), // Changed to orange
                     borderRadius: const BorderRadius.all(
                       Radius.circular(32),
                     ),
@@ -145,7 +161,7 @@ class _SwipeToJoinOutingWidgetState extends State<SwipeToJoinOutingWidget>
                   child: Center(
                     child: Icon(
                       Icons.arrow_forward,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Color.fromARGB(255, 255, 102, 0),
                     ),
                   ),
                 ),
