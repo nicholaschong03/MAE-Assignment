@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import 'package:jom_eat_project/foodie/screens/foodie_home_screen.dart';
+import 'package:jom_eat_project/foodie/screens/main_screen.dart';
 import '../adminpage GUI/admin_main.dart';
 import '../ccpage GUI/cc_main.dart';
 import '../adminfunction/policy.dart';
@@ -72,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
       if (userRole == 'foodie' && !isSuspended) {
         Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => FoodieHomeScreen(userId: userId)),
+        MaterialPageRoute(builder: (context) => MainScreen(userId: userId)),
         );
       } else if (userRole == 'admin' && !isSuspended) {
         Navigator.pushReplacement(
