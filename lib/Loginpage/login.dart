@@ -4,8 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import '../adminpage GUI/admin_main.dart';
-import '../ccpage GUI/cc_main.dart';
-import '../common function/user_services.dart'; // Import UserService
+import '../creator/cc_main.dart';
+import '../common function/user_services.dart'; 
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -62,6 +62,10 @@ class _LoginPageState extends State<LoginPage> {
       String userRole = userData['role'];
       bool isSuspended = userData['isSuspended'];
 
+      print('User ID: $userId');
+      print('User Data: $userData');
+      print('User Role: $userRole');
+      print('Is Suspended: $isSuspended');
 
       if (userRole == 'foodie' && !isSuspended) {
         // Navigator.pushReplacement(
@@ -75,10 +79,11 @@ class _LoginPageState extends State<LoginPage> {
               builder: (context) => AdminPage(userId: userId, role: userRole)),
         );
       } else if (userRole == 'cc' && !isSuspended) {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
-        // );
+         Navigator.pushReplacement(
+           context,
+           MaterialPageRoute(
+              builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
+         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Unknown User or Suspended User'),

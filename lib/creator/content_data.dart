@@ -10,7 +10,7 @@ class ContentData {
   DateTime scheduledAt;
   List<String> tags;
   int likes;
-  List<Map<String, String>> comments;
+  List<Map<String, dynamic>> comments; // Changed to dynamic to accommodate different data types
 
   ContentData({
     required this.contentId,
@@ -27,16 +27,16 @@ class ContentData {
 
   factory ContentData.fromFirestore(Map<String, dynamic> data) {
     return ContentData(
-      contentId: data['contentId'],
-      ccId: data['ccId'],
-      title: data['title'],
-      description: data['description'],
-      mediaUrls: List<String>.from(data['mediaUrls']),
+      contentId: data['contentId'] ?? '',
+      ccId: data['ccId'] ?? '',
+      title: data['title'] ?? '',
+      description: data['description'] ?? '',
+      mediaUrls: List<String>.from(data['mediaUrls'] ?? []),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       scheduledAt: (data['scheduledAt'] as Timestamp).toDate(),
-      tags: List<String>.from(data['tags']),
-      likes: data['likes'],
-      comments: List<Map<String, String>>.from(data['comments']),
+      tags: List<String>.from(data['tags'] ?? []),
+      likes: data['likes'] ?? 0,
+      comments: List<Map<String, dynamic>>.from(data['comments'] ?? []),
     );
   }
 
