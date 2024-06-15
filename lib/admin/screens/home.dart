@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:jom_eat_project/adminfunction/content_service.dart';
+import 'package:jom_eat_project/admin/functions/content_service.dart';
 
 class HomePanel extends StatelessWidget {
   final ContentService contentService = ContentService();

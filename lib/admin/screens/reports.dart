@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:jom_eat_project/adminfunction/statistic_service.dart';
+import 'package:jom_eat_project/admin/functions/statistic_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class ReportsPanel extends StatefulWidget {

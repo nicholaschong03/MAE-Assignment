@@ -5,9 +5,9 @@ import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
 import 'package:jom_eat_project/foodie/screens/foodie_home_screen.dart';
 import 'package:jom_eat_project/foodie/screens/main_screen.dart';
-import '../adminpage GUI/admin_main.dart';
-import '../ccpage GUI/cc_main.dart';
-import '../adminfunction/policy.dart';
+import '../admin/screens/admin_main.dart';
+import '../content creator/ccpage GUI/cc_main.dart';
+import '../admin/functions/policy.dart';
 import '../common function/user_services.dart';
 
 class LoginPage extends StatefulWidget {
@@ -82,10 +82,10 @@ class _LoginPageState extends State<LoginPage> {
               builder: (context) => AdminPage(userId: userId, role: userRole)),
         );
       } else if (userRole == 'cc' && !isSuspended) {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
-        // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ContentCreatorPage()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Unknown User or Suspended User'),
