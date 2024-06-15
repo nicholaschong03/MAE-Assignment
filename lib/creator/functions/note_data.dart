@@ -15,7 +15,7 @@ class NoteData {
     required this.createdAt,
   });
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toFirestore() {
     return {
       'noteId': noteId,
       'ccId': ccId,
@@ -25,7 +25,7 @@ class NoteData {
     };
   }
 
-  factory NoteData.fromMap(Map<String, dynamic> map) {
+  factory NoteData.fromFirestore(Map<String, dynamic> map) {
     return NoteData(
       noteId: map['noteId'],
       ccId: map['ccId'],

@@ -18,7 +18,7 @@ class UserData {
 
   Future<File?> pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.getImage(source: source);
+    final pickedFile = await picker.pickImage(source: source);
 
     if (pickedFile != null) {
       return File(pickedFile.path);
@@ -81,6 +81,7 @@ class UserData {
     return FirebaseAuth.instance.currentUser?.uid ?? '';
   }
   
+  
   //get user data based on user id
   Future<Map<String, dynamic>> getUserData() async {
     try {
@@ -90,5 +91,4 @@ class UserData {
       throw Exception('Failed to get user data: $e');
     }
   }
-
 }

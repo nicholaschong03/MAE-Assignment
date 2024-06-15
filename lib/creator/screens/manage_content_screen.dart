@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../ccfunction/content_data.dart';
-import '../ccfunction/content_function.dart';
-import '../ccfunction/content_card.dart';
+import 'content_data.dart';
+import 'content_function.dart';
+import 'content_card.dart';
+import '../common function/user_services.dart';
+import 'edit_content_screen.dart';
 
 class ManageContentScreen extends StatefulWidget {
   @override
@@ -15,15 +17,30 @@ class _ManageContentScreenState extends State<ManageContentScreen> {
   @override
   void initState() {
     super.initState();
-    _contentsStream = _contentFunction.getContentsByCreator('ccId'); // Replace with actual content creator id
+    _contentsStream = _contentFunction.getContentsByCreator(UserData.getCurrentUserID()); 
   }
 
   void _deleteContent(String contentId) async {
     await _contentFunction.deleteContent(contentId);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Content deleted')));
   }
 
   void _editContent(ContentData content) {
-    // Logic to edit content
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditContentScreen(content: content),
+      ),
+    );
+  }
+
+  void _likeContent(String contentId) async {
+    await _contentFunction.likeContent(contentId);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Content liked')));
+  }
+
+  void _commentOnContent() {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Comment added')));
   }
 
   @override
@@ -43,8 +60,8 @@ class _ManageContentScreenState extends State<ManageContentScreen> {
                 final content = contents[index];
                 return ContentCard(
                   content: content,
-                  onLike: () {}, // Add logic to like content
-                  onComment: () {}, // Add logic to comment on content
+                  onLike: () => _likeContent(content.contentId),
+                  onComment: _commentOnContent,
                   onEdit: () => _editContent(content),
                   onDelete: () => _deleteContent(content.contentId),
                 );

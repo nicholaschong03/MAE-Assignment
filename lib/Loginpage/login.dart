@@ -6,7 +6,7 @@ import 'package:jom_eat_project/Loginpage/signup.dart';
 import 'package:jom_eat_project/foodie/screens/foodie_home_screen.dart';
 import 'package:jom_eat_project/foodie/screens/main_screen.dart';
 import '../admin/screens/admin_main.dart';
-import '../content creator/ccpage GUI/cc_main.dart';
+import '../content creator/cc_main.dart';
 import '../admin/functions/policy.dart';
 import '../common function/user_services.dart';
 
@@ -69,6 +69,10 @@ class _LoginPageState extends State<LoginPage> {
       String userRole = userData['role'] ?? 'unknown';
       bool isSuspended = userData['isSuspended'] ?? false;
 
+      print('User ID: $userId');
+      print('User Data: $userData');
+      print('User Role: $userRole');
+      print('Is Suspended: $isSuspended');
 
       if (userRole == 'foodie' && !isSuspended) {
         Navigator.pushReplacement(
