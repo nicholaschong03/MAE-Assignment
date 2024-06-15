@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'content_data.dart';
 import 'content_function.dart';
-import '../common function/user_services.dart';
+import '../../common function/user_services.dart';
 
 class ContentCard extends StatelessWidget {
   final ContentData content;

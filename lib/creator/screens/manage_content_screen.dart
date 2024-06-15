@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'content_data.dart';
-import 'content_function.dart';
-import 'content_card.dart';
-import '../common function/user_services.dart';
+import '../functions/content_data.dart';
+import '../functions/content_function.dart';
+import '../functions/content_card.dart';
+import '../../common function/user_services.dart';
 import 'edit_content_screen.dart';
 
 class ManageContentScreen extends StatefulWidget {

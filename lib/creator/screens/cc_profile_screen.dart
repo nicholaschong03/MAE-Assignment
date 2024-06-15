@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
-import '../common function/user_services.dart';
+import '../../common function/user_services.dart';
 
 class CCProfileScreen extends StatefulWidget {
   @override

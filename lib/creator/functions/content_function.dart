@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'content_data.dart';
-import '../common function/user_services.dart';
+import '../../common function/user_services.dart';
 
 class ContentFunction {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

@@ -6,7 +6,7 @@ import 'manage_content_screen.dart';
 import 'schedule_content_screen.dart';
 import 'content_analysis_screen.dart';
 import 'cc_profile_screen.dart';
-import '../common function/notification.dart';
+import '../../common function/notification.dart';
 
 class ContentCreatorPage extends StatefulWidget {
   final String userId;
