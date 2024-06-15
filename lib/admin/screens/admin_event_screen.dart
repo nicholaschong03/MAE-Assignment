@@ -7,7 +7,6 @@ import 'package:intl/intl.dart';
 
 import '../functions/event_manage_functions.dart';
 
-
 class EventManagePage extends StatefulWidget {
   const EventManagePage({super.key});
 
@@ -68,27 +67,33 @@ class _EventManagePageState extends State<EventManagePage> {
             itemCount: events.length,
             itemBuilder: (context, index) {
               var event = events[index];
-              return FutureBuilder<String>(
-                future: getRestaurantNameFromId(event['restaurantId']),
+              return FutureBuilder<Map<String, String>>(
+                future: getRestaurantDataFromId(event['restaurantId']),
                 builder: (context, restaurantSnapshot) {
                   if (restaurantSnapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (restaurantSnapshot.hasError) {
                     return ListTile(
-                      title: Text('Error loading restaurant name', style: GoogleFonts.anekDevanagari(fontSize: 18, fontWeight: FontWeight.w600)),
+                      title: Text('Error loading restaurant info', style: GoogleFonts.anekDevanagari(fontSize: 18, fontWeight: FontWeight.w600)),
                       subtitle: Text(
                         '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']}',
                         style: GoogleFonts.roboto(fontSize: 14),
                       ),
                     );
                   } else {
+                    var restaurantData = restaurantSnapshot.data!;
                     return ListTile(
+                      leading: restaurantData['logo'] != null
+                        ? Image.network(restaurantData['logo']!, width: 50, height: 50, fit: BoxFit.cover)
+                        : const CircleAvatar(
+                          backgroundImage: NetworkImage('https://via.placeholder.com/200'),
+                        ),
                       title: Text(
                         event['title'],
                         style: GoogleFonts.anekDevanagari(fontSize: 18, fontWeight: FontWeight.w600),
                       ),
                       subtitle: Text(
-                        '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']} \nLocation: ${restaurantSnapshot.data}',
+                        '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} from ${event['startTime']} to ${event['endTime']} \nLocation: ${restaurantData['name']}',
                         style: GoogleFonts.roboto(fontSize: 14),
                       ),
                       trailing: IconButton(

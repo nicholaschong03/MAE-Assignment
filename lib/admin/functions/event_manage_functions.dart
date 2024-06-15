@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-// Function to get restaurant name from ID
-Future<String> getRestaurantNameFromId(DocumentReference restaurantRef) async {
+// Function to get restaurant name and logo from ID
+Future<Map<String, String>> getRestaurantDataFromId(DocumentReference restaurantRef) async {
   DocumentSnapshot restaurantSnapshot = await restaurantRef.get();
   if (restaurantSnapshot.exists && restaurantSnapshot.data() != null) {
     var data = restaurantSnapshot.data() as Map<String, dynamic>;
-    if (data.containsKey('name')) {
-      return data['name'];
+    if (data.containsKey('name') && data.containsKey('logo')) {
+      return {'name': data['name'], 'logo': data['logo']};
     } else {
-      throw Exception('name field does not exist in the restaurants document');
+      throw Exception('name or logo field does not exist in the restaurants document');
     }
   } else {
     throw Exception('restaurants document does not exist');
@@ -104,15 +104,28 @@ void showEventDetailsDialog(BuildContext context, DocumentSnapshot event) {
                   'Date',
                   '${DateFormat('yyyy-MM-dd').format((event['date'] as Timestamp).toDate())} (${event['day']}) ${event['startTime']} to ${event['endTime']}',
                 ),
-                FutureBuilder<String>(
-                  future: getRestaurantNameFromId(event['restaurantId']),
+                FutureBuilder<Map<String, String>>(
+                  future: getRestaurantDataFromId(event['restaurantId']),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Text('Loading...');
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else {
-                      return buildEventDetail('Venue', snapshot.data ?? 'Unknown');
+                      var restaurantData = snapshot.data!;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          buildEventDetail('Venue', restaurantData['name'] ?? 'Unknown'),
+                          if (restaurantData['logo'] != null)
+                            Image.network(
+                              restaurantData['logo']!,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                        ],
+                      );
                     }
                   },
                 ),
