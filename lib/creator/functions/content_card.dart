@@ -72,6 +72,24 @@ class ContentCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (content.comments.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: content.comments.map((comment) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${comment['user']}: ',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(child: Text(comment['comment'])),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
           ],
         ),
       ),

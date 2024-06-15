@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../common function/user_services.dart';
 import '../functions/content_data.dart';
 import '../functions/content_function.dart';
+import 'manage_content_screen.dart';
 
 class CreateContentScreen extends StatefulWidget {
   @override
@@ -54,7 +55,17 @@ class _CreateContentScreenState extends State<CreateContentScreen> {
       );
 
       await _contentFunction.createContent(content);
-      Navigator.pop(context);
+      
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Content created successfully.'),
+      ));
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ManageContentScreen(),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Title and Description are required.'),
