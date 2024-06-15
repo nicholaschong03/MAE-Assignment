@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../functions/content_data.dart';
 import '../functions/content_function.dart';
 
-
 class ContentAnalysisScreen extends StatefulWidget {
   @override
   _ContentAnalysisScreenState createState() => _ContentAnalysisScreenState();
