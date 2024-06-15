@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
-import '../common function/user_services.dart';
+import 'package:jom_eat_project/common function/user_services.dart';
 
 class CCProfileScreen extends StatefulWidget {
   @override
@@ -261,7 +261,7 @@ class _CCProfileScreenState extends State<CCProfileScreen> {
                     radius: 50,
                     backgroundImage: imageUrl.isNotEmpty
                         ? NetworkImage(imageUrl) as ImageProvider<Object>
-                        : AssetImage('assets/images/default_profile.png') as ImageProvider<Object>,
+                        : AssetImage('assets/images/default.jpg') as ImageProvider<Object>,
                   ),
                 ),
                 SizedBox(height: 16.0),

@@ -3,12 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:jom_eat_project/Loginpage/forgetpassword.dart';
 import 'package:jom_eat_project/Loginpage/signup.dart';
-import 'package:jom_eat_project/foodie/screens/foodie_home_screen.dart';
 import 'package:jom_eat_project/foodie/screens/main_screen.dart';
 import '../admin/screens/admin_main.dart';
-import '../content creator/cc_main.dart';
 import '../admin/functions/policy.dart';
 import '../common function/user_services.dart';
+import '../creator/screens/cc_main.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -88,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
       } else if (userRole == 'cc' && !isSuspended) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => ContentCreatorPage()),
+          MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole,)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

@@ -1,7 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'content_data.dart';
-import 'content_function.dart';
+import '../functions/content_data.dart';
+import '../functions/content_function.dart';
+
 
 class ContentAnalysisScreen extends StatefulWidget {
   @override
