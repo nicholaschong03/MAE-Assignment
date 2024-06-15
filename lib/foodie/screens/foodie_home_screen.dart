@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jom_eat_project/foodie/screens/my_outing_screen.dart';
 import 'package:jom_eat_project/services/database_service.dart';
 import 'package:jom_eat_project/foodie/widgets/promotion_card.dart';
 import 'package:jom_eat_project/models/outing_group_model.dart';
@@ -63,6 +64,19 @@ class _FoodieHomeScreenState extends State<FoodieHomeScreen> {
               'Foodie Home Dashboard',
               style: Theme.of(context).textTheme.titleLarge,
             ),
+                    actions: [
+          IconButton(
+            icon: const Icon(Icons.list),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MyOutingsScreen(userId: widget.userId),
+                ),
+              );
+            },
+          ),
+        ],
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.pin,
               background: DecoratedBox(

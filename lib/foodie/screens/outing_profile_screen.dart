@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jom_eat_project/foodie/screens/foodie_profile_screen.dart';
+import 'package:jom_eat_project/foodie/widgets/image_display_widget.dart';
 import 'package:jom_eat_project/foodie/widgets/profile_picture_widget.dart';
 import 'package:jom_eat_project/foodie/widgets/swipe_to_join_outing_widget.dart';
 import 'package:jom_eat_project/models/outing_group_model.dart';
@@ -237,6 +238,27 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
             ),
             const SizedBox(height: 12),
 
+            // Organizer
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: ImageDisplayWidget(
+                    width: 24,
+                    height: 24,
+                    pixelRatio: 1,
+                    imageUrl: outing.createdByUser.profileImage,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const SizedBox(width: 8),
+                Expanded(
+                    child: Text('Organized by ${outing.createdByUser.name}')),
+              ],
+            ),
+            const SizedBox(height: 8),
+
             // Date
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -285,6 +307,17 @@ class _OutingProfileScreenState extends State<OutingProfileScreen> {
                 Icon(Icons.group_outlined, size: iconSize),
                 const SizedBox(width: 8),
                 Expanded(child: Text('Max. ${outing.maxMembers} participants')),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Description
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(Icons.food_bank, size: iconSize),
+                const SizedBox(width: 8),
+                Expanded(child: Text('Max. ${outing.description}')),
               ],
             ),
           ],

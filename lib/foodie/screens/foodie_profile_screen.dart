@@ -4,10 +4,10 @@ import 'package:jom_eat_project/foodie/widgets/progress_indicator_widget.dart';
 import 'package:jom_eat_project/foodie/widgets/section_title_row.dart';
 import 'package:jom_eat_project/foodie/widgets/badge_widget.dart';
 import 'package:jom_eat_project/foodie/widgets/points_breakdown_widget.dart';
+import 'package:jom_eat_project/foodie/widgets/edit_profile_widget.dart';
 import 'package:jom_eat_project/models/foodie_model.dart';
 import 'package:jom_eat_project/services/database_service.dart';
 import 'dart:ui'; // Add this import
-
 class FoodieProfileScreen extends StatefulWidget {
   const FoodieProfileScreen({super.key, required this.userId});
   final String userId;
@@ -18,16 +18,25 @@ class FoodieProfileScreen extends StatefulWidget {
 
 class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
   bool darkMode = true;
+  late Future<FoodieModel> _futureFoodie;
 
   @override
-  Widget build(BuildContext) {
-    final String userId =
-        widget.userId; // Replace with the actual user ID
-    final DataService _databaseService = DataService();
+  void initState() {
+    super.initState();
+    _futureFoodie = DataService().getFoodie(widget.userId);
+  }
 
+  void _refreshProfile() {
+    setState(() {
+      _futureFoodie = DataService().getFoodie(widget.userId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<FoodieModel>(
-        future: _databaseService.getFoodie(userId),
+        future: _futureFoodie,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -39,9 +48,31 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
             return const Center(child: Text('User data not found.'));
           } else {
             FoodieModel user = snapshot.data!;
-            print(
-                'User data: ${user.name}, ${user.email}, ${user.profileImage}');
-            return _buildBody(user);
+            print('User data: ${user.name}, ${user.email}, ${user.profileImage}');
+            return Stack(
+              children: [
+                _buildBody(user),
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditProfileScreen(
+                            user: user,
+                            onProfileUpdated: _refreshProfile,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Icon(Icons.edit),
+                    backgroundColor: Colors.orange,
+                  ),
+                ),
+              ],
+            );
           }
         },
       ),
@@ -170,8 +201,7 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
           Text(
             'Foodie',
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color:
-                      darkMode ? Colors.white : Theme.of(context).primaryColor,
+                  color: darkMode ? Colors.white : Theme.of(context).primaryColor,
                 ),
           ),
           const SizedBox(height: 24),
