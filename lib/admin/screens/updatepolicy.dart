@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:jom_eat_project/adminfunction/policy.dart'; // Import the new file
+import 'package:jom_eat_project/admin/functions/policy.dart'; // Import the new file
 
 class UpdatePolicyPage extends StatefulWidget {
   final String userId;
@@ -18,7 +18,7 @@ class _UpdatePolicyPageState extends State<UpdatePolicyPage> {
   @override
   void initState() {
     super.initState();
-    policyData = PolicyData(userId: widget.userId); // Initialize PolicyData
+    policyData = PolicyData(); // Initialize PolicyData
     _policiesFuture = policyData.getPolicies();
   }
 

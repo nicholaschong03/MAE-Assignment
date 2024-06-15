@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:jom_eat_project/Loginpage/login.dart';
@@ -53,6 +54,24 @@ class _SignUpPageState extends State<SignUpPage> {
         username: _usernameController.text,
         role: _selectedRole!,
       );
+
+      if (_selectedRole == "foodie") {
+        await FirebaseFirestore.instance
+            .collection('foodies')
+            .doc(UserData.getCurrentUserID())
+            .set({
+          'userId': UserData.getCurrentUserID(),
+          "engagementScore": 10,
+          "badgeCount": 1,
+          "badgeImage":
+              "https://aadl.org/files/badge-derivs/400/badge_scout_FOODIE_400.png",
+          "badgeTitle": "Foodie",
+          "level": 1,
+          "membershipStatus": "silver",
+          "outingParticipationPoint": 0,
+          "points": 1500,
+        });
+      }
 
       // Send notification to admin
       final NotificationService notificationService = NotificationService();

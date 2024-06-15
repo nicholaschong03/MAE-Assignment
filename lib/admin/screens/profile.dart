@@ -3,10 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import '../adminpage GUI/updatepolicy.dart';
-import '../Loginpage/login.dart';
-import '../common function/verification.dart';
-import '../common function/user_services.dart';
+import 'updatepolicy.dart';
+import '../../Loginpage/login.dart';
+import '../../common function/verification.dart';
+import '../../common function/user_services.dart';
 
 class ProfilePanel extends StatefulWidget {
   late final String currentUser = UserData.getCurrentUserID();
