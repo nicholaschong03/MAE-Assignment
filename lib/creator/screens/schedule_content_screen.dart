@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../../common function/user_services.dart';
 import '../functions/content_data.dart';
 import '../functions/content_function.dart';
 import '../functions/note_data.dart';
 import '../functions/note_function.dart';
-
 
 class ScheduleContentScreen extends StatefulWidget {
   @override
