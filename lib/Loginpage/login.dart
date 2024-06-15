@@ -82,10 +82,10 @@ class _LoginPageState extends State<LoginPage> {
               builder: (context) => AdminPage(userId: userId, role: userRole)),
         );
       } else if (userRole == 'cc' && !isSuspended) {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => ContentCreatorPage(userId: userId, role: userRole)),
-        // );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ContentCreatorPage()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Unknown User or Suspended User'),

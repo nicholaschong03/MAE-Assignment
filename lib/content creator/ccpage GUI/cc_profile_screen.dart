@@ -43,7 +43,6 @@ class CCProfileScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 8.0),
-                Text('Followers: ${userData['followersCount']}'),
                 SizedBox(height: 8.0),
                 Expanded(
                   child: ListView(
