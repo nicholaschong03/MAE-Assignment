@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jom_eat_project/models/promotion_model.dart';
-import '../widgets/image_display_widget.dart';
+import '../image_display_widget.dart';
 
 // class PromotionCard extends StatelessWidget {
 //   const PromotionCard({super.key, required this.promotion});

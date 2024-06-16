@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:jom_eat_project/foodie/widgets/select_restaurant_model.dart';
+import 'package:jom_eat_project/foodie/widgets/create_outing_screen_widget/select_restaurant_model.dart';
 import 'dart:typed_data';
 import 'package:jom_eat_project/models/restaurant_model.dart';
 import 'package:jom_eat_project/services/database_service.dart';

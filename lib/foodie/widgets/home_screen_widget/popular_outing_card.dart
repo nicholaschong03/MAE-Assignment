@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jom_eat_project/foodie/screens/outing_profile_screen.dart';
 import 'package:jom_eat_project/models/outing_group_model.dart';
-import '../widgets/image_display_widget.dart';
+import '../image_display_widget.dart';
 
 class PopularOutingCard extends StatelessWidget {
   const PopularOutingCard({

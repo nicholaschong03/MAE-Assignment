@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jom_eat_project/foodie/screens/foodie_profile_screen.dart';
 import 'package:jom_eat_project/foodie/widgets/image_display_widget.dart';
 import 'package:jom_eat_project/foodie/widgets/profile_picture_widget.dart';
-import 'package:jom_eat_project/foodie/widgets/swipe_to_join_outing_widget.dart';
+import 'package:jom_eat_project/foodie/widgets/outing_scree_widget/swipe_to_join_outing_widget.dart';
 import 'package:jom_eat_project/models/outing_group_model.dart';
 import 'package:jom_eat_project/models/user_model.dart';
 import 'package:jom_eat_project/services/database_service.dart';
