@@ -10,7 +10,7 @@ class ContentData {
   DateTime scheduledAt;
   List<String> tags;
   int likes;
-  List<Map<String, dynamic>> comments; // Changed to dynamic to accommodate different data types
+  List<Map<String, dynamic>> comments;
 
   ContentData({
     required this.contentId,

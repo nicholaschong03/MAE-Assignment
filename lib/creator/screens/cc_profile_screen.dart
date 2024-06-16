@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:jom_eat_project/Loginpage/login.dart';
 import 'package:jom_eat_project/common function/user_services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CCProfileScreen extends StatefulWidget {
   @override
@@ -227,6 +226,38 @@ class _CCProfileScreenState extends State<CCProfileScreen> {
     );
   }
 
+  void _showLogoutConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Logout'),
+          content: Text('Are you sure you want to log out?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const LoginPage(), // Ensure LoginPage is imported correctly
+                ),
+              );
+            },
+              child: Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -305,6 +336,10 @@ class _CCProfileScreenState extends State<CCProfileScreen> {
                           _showEditProfileDialog(userData);
                         },
                         child: Text('Edit Profile'),
+                      ),
+                      TextButton(
+                        onPressed: _showLogoutConfirmationDialog,
+                        child: Text('Logout'),
                       ),
                     ],
                   ),

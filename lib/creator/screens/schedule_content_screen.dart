@@ -29,7 +29,7 @@ class _ScheduleContentScreenState extends State<ScheduleContentScreen> {
     _fetchNotes();
   }
 
-  void _fetchScheduledContents() async {
+  Future<void> _fetchScheduledContents() async {
     _contentFunction.getContentsByCreator(_ccId).listen((contents) {
       setState(() {
         _scheduledContents = {};
@@ -44,7 +44,7 @@ class _ScheduleContentScreenState extends State<ScheduleContentScreen> {
     });
   }
 
-  void _fetchNotes() async {
+  Future<void> _fetchNotes() async {
     _noteFunction.getNotesByCreator(_ccId).listen((notes) {
       setState(() {
         _notes = {};
@@ -104,6 +104,27 @@ class _ScheduleContentScreenState extends State<ScheduleContentScreen> {
     );
   }
 
+  List<dynamic> _getEventsForDay(DateTime day) {
+    final contents = _scheduledContents[day] ?? [];
+    final notes = _notes[day] ?? [];
+    return [...contents, ...notes];
+  }
+
+  Widget _buildEventsMarker(DateTime date, List events) {
+    return Container(
+      margin: EdgeInsets.all(4),
+      padding: EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: events.any((e) => e is ContentData) ? Colors.blue : Colors.red,
+      ),
+      child: Text(
+        '${events.length}',
+        style: TextStyle(color: Colors.white, fontSize: 12),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,16 +146,20 @@ class _ScheduleContentScreenState extends State<ScheduleContentScreen> {
                 _selectedDay = selectedDay;
               });
             },
-            eventLoader: (day) {
-              final events = _scheduledContents[day] ?? [];
-              final notes = _notes[day] ?? [];
-              return [...events, ...notes];
-            },
+            eventLoader: _getEventsForDay,
             calendarStyle: CalendarStyle(
+              markersMaxCount: 1,
               markerDecoration: BoxDecoration(
-                color: Colors.blue,
                 shape: BoxShape.circle,
               ),
+            ),
+            calendarBuilders: CalendarBuilders(
+              markerBuilder: (context, date, events) {
+                if (events.isNotEmpty) {
+                  return _buildEventsMarker(date, events);
+                }
+                return SizedBox.shrink();
+              },
             ),
           ),
           Expanded(

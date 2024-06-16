@@ -17,12 +17,15 @@ class _ManageContentScreenState extends State<ManageContentScreen> {
   @override
   void initState() {
     super.initState();
-    _contentsStream = _contentFunction.getContentsByCreator(UserData.getCurrentUserID()); 
+    _contentsStream = _contentFunction.getContentsByCreator(UserData.getCurrentUserID());
   }
 
   void _deleteContent(String contentId) async {
     await _contentFunction.deleteContent(contentId);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Content deleted')));
+    setState(() {
+      _contentsStream = _contentFunction.getContentsByCreator(UserData.getCurrentUserID());
+    });
   }
 
   void _editContent(ContentData content) {
