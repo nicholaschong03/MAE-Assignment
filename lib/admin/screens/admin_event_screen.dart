@@ -4,8 +4,7 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
-
-import '../functions/event_manage_functions.dart';
+import '../functions/event_manage_functions.dart'; // Import the new file
 
 class EventManagePage extends StatefulWidget {
   const EventManagePage({super.key});
@@ -37,7 +36,7 @@ class _EventManagePageState extends State<EventManagePage> {
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('outingGroups').snapshots(),
+        stream: getOutingGroupsStream(), // Use the new function here
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
