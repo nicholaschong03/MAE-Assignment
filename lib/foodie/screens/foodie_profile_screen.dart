@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:jom_eat_project/foodie/widgets/profile_picture_widget.dart';
 import 'package:jom_eat_project/foodie/widgets/progress_indicator_widget.dart';
-import 'package:jom_eat_project/foodie/widgets/section_title_row.dart';
-import 'package:jom_eat_project/foodie/widgets/badge_widget.dart';
-import 'package:jom_eat_project/foodie/widgets/points_breakdown_widget.dart';
-import 'package:jom_eat_project/foodie/widgets/edit_profile_widget.dart';
+import 'package:jom_eat_project/foodie/widgets/profile_screen_widget/badge_widget.dart';
+import 'package:jom_eat_project/foodie/widgets/profile_screen_widget/points_breakdown_widget.dart';
+import 'package:jom_eat_project/foodie/widgets/profile_screen_widget/edit_profile_widget.dart';
 import 'package:jom_eat_project/models/foodie_model.dart';
 import 'package:jom_eat_project/services/database_service.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Add this import
 import 'dart:ui'; // Add this import
+import 'package:jom_eat_project/Loginpage/login.dart';
+
 class FoodieProfileScreen extends StatefulWidget {
   const FoodieProfileScreen({super.key, required this.userId});
   final String userId;
@@ -30,6 +32,14 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
     setState(() {
       _futureFoodie = DataService().getFoodie(widget.userId);
     });
+  }
+
+  void _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 
   @override
@@ -55,20 +65,31 @@ class _FoodieProfileScreenState extends State<FoodieProfileScreen> {
                 Positioned(
                   bottom: 16,
                   right: 16,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditProfileScreen(
-                            user: user,
-                            onProfileUpdated: _refreshProfile,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Icon(Icons.edit),
-                    backgroundColor: Colors.orange,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FloatingActionButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfileScreen(
+                                user: user,
+                                onProfileUpdated: _refreshProfile,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Icon(Icons.edit),
+                        backgroundColor: Colors.orange,
+                      ),
+                      const SizedBox(height: 8),
+                      FloatingActionButton(
+                        onPressed: _logout,
+                        child: const Icon(Icons.logout),
+                        backgroundColor: Colors.red,
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jom_eat_project/models/content_model.dart';
 import 'package:jom_eat_project/services/database_service.dart';
-import 'package:jom_eat_project/foodie/widgets/feed_post_card.dart';
+import 'package:jom_eat_project/foodie/widgets/feed_post_widget/feed_post_card.dart';
 
 class FeedPostScreen extends StatefulWidget {
   @override

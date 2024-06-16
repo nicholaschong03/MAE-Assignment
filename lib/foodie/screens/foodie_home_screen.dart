@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:jom_eat_project/foodie/screens/my_outing_screen.dart';
 import 'package:jom_eat_project/services/database_service.dart';
-import 'package:jom_eat_project/foodie/widgets/promotion_card.dart';
+import 'package:jom_eat_project/foodie/widgets/home_screen_widget/promotion_card.dart';
 import 'package:jom_eat_project/models/outing_group_model.dart';
 import 'package:jom_eat_project/models/promotion_model.dart';
 import 'package:jom_eat_project/models/foodie_model.dart';
 import 'package:jom_eat_project/foodie/screens/outing_profile_screen.dart';
-import 'package:jom_eat_project/foodie/widgets/discover_group_card.dart';
-import 'package:jom_eat_project/foodie/widgets/popular_outing_card.dart';
+import 'package:jom_eat_project/foodie/widgets/home_screen_widget/discover_group_card.dart';
+import 'package:jom_eat_project/foodie/widgets/home_screen_widget/popular_outing_card.dart';
 import 'package:jom_eat_project/foodie/widgets/section_title_row.dart';
 
 class FoodieHomeScreen extends StatefulWidget {
