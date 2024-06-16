@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../common function/user_services.dart';
 import '../functions/content_data.dart';
 import '../functions/content_function.dart';
-import 'manage_content_screen.dart';
 
 class CreateContentScreen extends StatefulWidget {
   @override
@@ -54,18 +53,27 @@ class _CreateContentScreenState extends State<CreateContentScreen> {
         comments: [],
       );
 
-      await _contentFunction.createContent(content);
-      
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Content created successfully.'),
-      ));
+      try {
+        await _contentFunction.createContent(content);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ManageContentScreen(),
-        ),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Content created successfully.'),
+        ));
+
+        // Clear the form fields and reset state
+        setState(() {
+          _titleController.clear();
+          _descriptionController.clear();
+          _tagController.clear();
+          _mediaUrls.clear();
+          _tags.clear();
+          _scheduledAt = null;
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to create content: $e'),
+        ));
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Title and Description are required.'),
